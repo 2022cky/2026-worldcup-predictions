@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Codex世界杯预测引擎 v7 — v6优化版
-基于6月18日复盘: 新增历史战意/大巴阵型/核心灾难状态/进球通胀修正
+基于6月18-19日复盘: 新增历史战意/大巴阵型/核心灾难状态/R12严格触发/平局惯性因子
 """
 import json, sys, io, os, math
 from datetime import datetime, timezone, timedelta
@@ -234,7 +234,7 @@ def predict_match_v7(home_cn, away_cn, home_rank=None, away_rank=None,
                      home_bus=False, away_bus=False,  # v7 R7: 大巴阵型
                      home_return_years=0, away_return_years=0,  # v7 R6: 重返年数
                      home_has_disaster=False, away_has_disaster=False):  # v7 R9
-    """v7 全维度预测引擎 — 6月18日复盘优化"""
+    """v7 全维度预测引擎 — 6月19日更新"""
 
     hr = home_rank or FIFA_RANK.get(home_cn, 80)
     ar = away_rank or FIFA_RANK.get(away_cn, 80)
@@ -544,72 +544,74 @@ def predict_match_v7(home_cn, away_cn, home_rank=None, away_rank=None,
 bj_now = (datetime.now(timezone.utc) + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M')
 
 print("=" * 80)
-print("  Codex v7 — 2026世界杯 6月18日 复盘优化预测")
-print(f"  生成: {bj_now} 北京 | v6复盘→v7优化: 历史战意+大巴阵型+进球修正")
+print("  Codex v7 — 2026世界杯 6月19日 预测分析")
+print(f"  生成: {bj_now} 北京 | v7/v8混合模型: 历史战意+大巴阵型+进球修正+平局惯性")
 print("=" * 80)
 
 matches = [
+    # ═══ 6月19日 A组 捷克 vs 南非 (已完赛) ═══
     {
-        "home_cn":"葡萄牙","away_cn":"刚果(金)",
-        "home_rank":6,"away_rank":65,
-        "time":"6/18 01:00 (已完赛)","group":"K组",
+        "home_cn":"捷克","away_cn":"南非",
+        "home_rank":31,"away_rank":80,
+        "time":"6/19 00:00 (已完赛)","group":"A组",
         "actual":"1-1",
-        "home_players":[("C罗","FWD"),("B费","MID"),("B席","MID"),("内托","FWD"),("维蒂尼亚","MID")],
-        "away_players":[("巴坎布","FWD"),("维萨","FWD"),("万比萨卡","DEF"),("姆本巴","DEF")],
-        "home_injuries":[{"name":"鲁本·迪亚斯","weight":0.06,"status":"❌缺席"}],
-        "away_injuries":[],
-        "referee":"Abdulrahman Al-Jassim",
-        "odds_home":1.13,"odds_draw":5.86,"odds_away":13.50,
-        "handicap":1.5,
-        "home_return_years":0,"away_return_years":52,
-        "away_bus":True,  # 刚果5-3-2大巴
-    },
-    {
-        "home_cn":"英格兰","away_cn":"克罗地亚",
-        "home_rank":4,"away_rank":10,
-        "time":"6/18 04:00 (已完赛)","group":"L组",
-        "actual":"4-2",
-        "home_players":[("凯恩","FWD"),("贝林厄姆","MID"),("赖斯","MID"),("戈登","FWD"),("马杜埃克","FWD")],
-        "away_players":[("莫德里奇","MID"),("科瓦契奇","MID"),("格瓦迪奥尔","DEF"),("布迪米尔","FWD"),("佩里西奇","MID")],
-        "home_injuries":[{"name":"萨卡","weight":0.06,"status":"❌缺席"}],
-        "away_injuries":[{"name":"科瓦契奇","weight":0.03,"status":"⚠️恢复中"},
-                         {"name":"格瓦迪奥尔","weight":0.02,"status":"⚠️恢复中"},
-                         {"name":"莫德里奇面具","weight":0.01,"status":"⚠️恢复中"},
-                         {"name":"多人带伤","weight":0.04,"status":"⚠️恢复中"}],
-        "referee":"Clement Turpin",
-        "odds_home":1.74,"odds_draw":3.86,"odds_away":5.0,
-        "handicap":0.5,
+        "home_players":[("希克","FWD"),("绍切克","MID"),("萨迪莱克","MID"),("克雷伊奇","DEF")],
+        "away_players":[("莫科纳","MID")],
+        "home_injuries":[],
+        "away_injuries":[{"name":"兹瓦内红牌+追加","weight":0.08,"status":"❌缺席"},
+                         {"name":"西索尔红牌","weight":0.05,"status":"❌缺席"}],
+        "referee":"Tess Olofsson",
+        "odds_home":1.42,"odds_draw":4.50,"odds_away":7.50,
+        "handicap":1.0,
         "home_return_years":0,"away_return_years":0,
     },
+    # ═══ 6月19日 B组 瑞士 vs 波黑 (待赛) ═══
     {
-        "home_cn":"加纳","away_cn":"巴拿马",
-        "home_rank":48,"away_rank":52,
-        "time":"6/18 07:00 (进行中)","group":"L组",
-        "actual":"?",
-        "home_players":[("托马斯帕尔特伊","MID"),("库杜斯","MID"),("乔丹阿尤","FWD"),("塞梅诺","FWD")],
-        "away_players":[("卡拉斯基利亚","MID"),("戴维斯","DEF"),("戈多伊","MID"),("法哈多","FWD")],
-        "home_injuries":[{"name":"帕尔特伊签证","weight":0.12,"status":"❌缺席"},
-                         {"name":"库杜斯","weight":0.06,"status":"❌缺席"}],
-        "away_injuries":[{"name":"卡拉斯基利亚","weight":0.02,"status":"⚠️存疑"}],
-        "referee":"Glenn Nyberg",
-        "away_return_years":0,"home_return_years":0,
-    },
-    {
-        "home_cn":"乌兹别克斯坦","away_cn":"哥伦比亚",
-        "home_rank":64,"away_rank":15,
-        "time":"6/18 10:00 (待开赛)","group":"K组",
+        "home_cn":"瑞士","away_cn":"波黑",
+        "home_rank":18,"away_rank":70,
+        "time":"6/19 03:00","group":"B组",
         "actual":"⏳",
-        "home_players":[("肖穆罗多夫","FWD"),("胡桑诺夫","DEF"),("法伊祖拉耶夫","MID")],
-        "away_players":[("路易斯迪亚斯","FWD"),("J罗","MID"),("杜兰","FWD"),("金特罗","MID")],
-        "home_injuries":[{"name":"阿利库洛夫","weight":0.04,"status":"❌缺席"},
-                         {"name":"马沙里波夫","weight":0.03,"status":"⚠️存疑"}],
+        "home_players":[("扎卡","MID"),("恩博洛","FWD"),("阿坎吉","DEF"),("恩多耶","FWD"),("科贝尔","GK")],
+        "away_players":[("哲科","FWD"),("德米罗维奇","FWD"),("科拉希纳茨","DEF"),("德迪奇","DEF")],
+        "home_injuries":[],
+        "away_injuries":[{"name":"塞利克","weight":0.03,"status":"❌缺席"},
+                         {"name":"科拉希纳茨带伤","weight":0.02,"status":"⚠️恢复中"}],
+        "referee":"João Pinheiro",
+        "odds_home":1.55,"odds_draw":4.00,"odds_away":5.50,
+        "handicap":1.0,
+        "home_return_years":0,"away_return_years":12,  # 2014→2026 不触发R6
+    },
+    # ═══ 6月19日 B组 加拿大 vs 卡塔尔 (待赛) ═══
+    {
+        "home_cn":"加拿大","away_cn":"卡塔尔",
+        "home_rank":26,"away_rank":36,
+        "time":"6/19 06:00","group":"B组",
+        "actual":"⏳",
+        "home_players":[("乔纳森戴维","FWD"),("尤斯塔基奥","MID"),("拉林","FWD"),("布坎南","MID")],
+        "away_players":[("阿菲夫","FWD"),("阿里","FWD"),("海多斯","MID")],
+        "home_injuries":[{"name":"阿方索戴维斯","weight":0.06,"status":"⚠️存疑"}],
         "away_injuries":[],
-        "referee":"Anthony Taylor",
-        "is_debut_home":True,
-        "home_return_years":999,"away_return_years":0,
-        "venue":"墨西哥城(2250m高原)",
-        "odds_home":9.50,"odds_draw":5.00,"odds_away":1.30,
-        "handicap":1.5,
+        "referee":"Cristian Garay",
+        "odds_home":1.65,"odds_draw":3.80,"odds_away":5.00,
+        "handicap":0.5,
+        "home_return_years":0,"away_return_years":0,
+        "venue":"温哥华(加拿大主场)",
+    },
+    # ═══ 6月19日 A组 墨西哥 vs 韩国 (待赛) 【焦点战】 ═══
+    {
+        "home_cn":"墨西哥","away_cn":"韩国",
+        "home_rank":17,"away_rank":24,
+        "time":"6/19 09:00","group":"A组",
+        "actual":"⏳",
+        "home_players":[("希门尼斯","FWD"),("洛萨诺","FWD"),("阿尔瓦雷斯","MID"),("奥乔亚","GK")],
+        "away_players":[("孙兴慜","FWD"),("李刚仁","MID"),("金玟哉","DEF"),("黄仁范","MID"),("黄喜灿","FWD")],
+        "home_injuries":[{"name":"蒙特斯","weight":0.06,"status":"❌红牌停赛"}],
+        "away_injuries":[],
+        "referee":"Gustavo Tejera",
+        "odds_home":2.60,"odds_draw":3.30,"odds_away":2.80,
+        "handicap":0,
+        "home_return_years":0,"away_return_years":0,
+        "venue":"瓜达拉哈拉(墨西哥主场)",
     },
 ]
 
@@ -692,7 +694,7 @@ print(f"""
   {'#':<3} {'比赛':<24} {'实际':<6} {'v6':<6} {'v7':<6} {'方向':<6} {'改善':<20}
   {'─'*80}""")
 
-v6_preds = ["1-0", "2-1", "2-1", "1-2"]
+v6_preds = ["2-0", "1-0", "2-1", "1-1"]  # v8预测: 捷克2-0(实际1-1) 瑞士1-0 加拿大2-1 墨西哥1-1
 for i, (m, p, _, _) in enumerate(results, 1):
     v6p_parts = v6_preds[i-1].split('-')
     v7p_parts = p['ft'].split('-')
@@ -751,12 +753,12 @@ print(f"""
 
 {'='*80}
   📌 v7 数据文件: player_database_v6.json | referee_database_v6.json | worldcup_data.json
-  📌 复盘来源: 葡萄牙1-1刚果(金) | 英格兰4-2克罗地亚
+  📌 复盘来源: 捷克1-1南非 | 瑞士vs波黑(待赛) | 加拿大vs卡塔尔(待赛) | 墨西哥vs韩国(待赛)
   ⚠️ 所有预测仅供娱乐参考
 {'='*80}
 """)
 
 # 保存文件
-out_txt = os.path.join(BASE_DIR, f"2026世界杯6月18日预测分析_v7.txt")
+out_txt = os.path.join(BASE_DIR, f"2026世界杯6月19日预测分析_v7.txt")
 # (省略txt保存，以md为主)
-print(f"\n  v7预测引擎就绪。复盘文档: 2026世界杯6月18日复盘与v7优化预测.md")
+print(f"\n  v7预测引擎就绪。复盘文档: 2026世界杯6月19日复盘与瑞士vs波黑深度预测.md")
