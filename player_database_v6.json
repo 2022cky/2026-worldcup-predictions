@@ -1,0 +1,143 @@
+{
+  "_description": "2026世界杯球员数据库 v6.1 — 修正C罗等球员评分(加入热身赛表现+年龄衰减)",
+  "_updated": "2026-06-17 18:00",
+
+  "葡萄牙": {
+    "C罗": {"club":"利雅得胜利","league":"沙特联","apps":30,"mins":2601,"goals":28,"assists":2,"rating":7.19,
+           "warmup_shots":8,"warmup_goals":0,"warmup_duel_win":0,"warmup_mins":125,
+           "note":"❌热身赛8射0球！对尼日利亚全场最低分！0%地面对抗胜率！41岁只能踢60分钟！每日邮报:'各项能力退化明显'。卫报:'已成葡萄牙的枷锁'。主持人:'C罗正毁掉葡萄牙捧杯机会'。沙特28球在世界杯层面毫无参考价值",
+           "form":"❌极差","fatigue":"中","age":41,"warmup_form":"灾难级"},
+    "B费": {"club":"曼联","league":"英超","apps":37,"mins":3198,"goals":9,"assists":22,"rating":8.5,
+           "note":"英超助攻纪录(21助)，POTY，132次创造机会，葡萄牙真正核心","form":"🔥极佳","fatigue":"中高","age":31},
+    "B席": {"club":"曼城","league":"英超","apps":42,"mins":3300,"goals":7,"assists":10,"rating":7.4,
+           "note":"曼城全能中场，控球+防守+创造力兼具","form":"良好","fatigue":"中","age":31},
+    "莱奥": {"club":"AC米兰","league":"意甲","apps":35,"mins":2126,"goals":10,"assists":3,"rating":6.8,
+           "note":"赛季低迷！米兰无缘欧冠！对智利热身赛红牌！可能被佩德罗内托挤到替补席","form":"⚠️低迷","fatigue":"低","age":26,"warmup_form":"差"},
+    "若塔": {"club":"利物浦","league":"英超","apps":38,"mins":2500,"goals":16,"assists":7,"rating":7.5,
+           "note":"利物浦锋线核心，效率高","form":"良好","fatigue":"中","age":29},
+    "内托": {"club":"切尔西","league":"英超","apps":32,"mins":2200,"goals":8,"assists":9,"rating":7.3,
+           "note":"可能挤掉莱奥首发！状态优于莱奥","form":"良好","fatigue":"中","age":26},
+    "鲁本迪亚斯": {"club":"曼城","league":"英超","apps":30,"mins":2500,"goals":2,"assists":0,"rating":7.2,
+           "note":"❌主教练确认缺阵首战！\"不是冒险的时候\"","form":"伤缺","fatigue":"N/A","age":28},
+    "维蒂尼亚": {"club":"巴黎圣日耳曼","league":"法甲","apps":40,"mins":3400,"goals":3,"assists":8,"rating":7.6,
+           "note":"欧冠冠军！PSG核心中场","form":"🔥极佳","fatigue":"中","age":26},
+    "若昂内维斯": {"club":"巴黎圣日耳曼","league":"法甲","apps":38,"mins":3100,"goals":2,"assists":5,"rating":7.3,
+           "note":"欧冠冠军！年轻中场，活力充沛","form":"良好","fatigue":"中","age":21}
+  },
+
+  "刚果(金)": {
+    "巴坎布": {"club":"加拉塔萨雷","league":"土超","apps":32,"mins":2400,"goals":18,"assists":5,"rating":7.5,
+           "note":"土超射手，52年首次世界杯","form":"良好","fatigue":"中","age":35},
+    "维萨": {"club":"布伦特福德","league":"英超","apps":35,"mins":2800,"goals":10,"assists":6,"rating":7.0,
+           "note":"英超中游核心","form":"良好","fatigue":"中高","age":29},
+    "万比萨卡": {"club":"西汉姆联","league":"英超","apps":33,"mins":2900,"goals":0,"assists":4,"rating":6.9,
+           "note":"防守型边卫","form":"良好","fatigue":"中","age":28},
+    "姆本巴": {"club":"马赛","league":"法甲","apps":30,"mins":2600,"goals":1,"assists":1,"rating":6.8,
+           "note":"经验防线核心","form":"一般","fatigue":"中","age":31}
+  },
+
+  "英格兰": {
+    "凯恩": {"club":"拜仁慕尼黑","league":"德甲","apps":51,"mins":4200,"goals":61,"assists":10,"rating":9.0,
+           "note":"欧洲金靴61球！史上最强赛季！","form":"🔥🔥巅峰","fatigue":"中高","age":32},
+    "贝林厄姆": {"club":"皇马","league":"西甲","apps":37,"mins":2800,"goals":8,"assists":5,"rating":7.2,
+           "note":"肩伤手术后恢复，数据下滑","form":"⚠️一般","fatigue":"中","age":22},
+    "萨卡": {"club":"阿森纳","league":"英超","apps":28,"mins":2200,"goals":9,"assists":8,"rating":7.4,
+           "note":"⚠️跟腱炎！大概率不首发","form":"⚠️伤病","fatigue":"N/A","age":24},
+    "赖斯": {"club":"阿森纳","league":"英超","apps":40,"mins":3500,"goals":4,"assists":5,"rating":7.5,
+           "note":"防守中场核心","form":"良好","fatigue":"中高","age":27},
+    "福登": {"club":"曼城","league":"英超","apps":38,"mins":2800,"goals":14,"assists":11,"rating":7.6,
+           "note":"❌被图赫尔排除大名单！","form":"落选","fatigue":"N/A","age":25},
+    "帕尔默": {"club":"切尔西","league":"英超","apps":36,"mins":3000,"goals":16,"assists":12,"rating":7.5,
+           "note":"❌被图赫尔排除大名单！","form":"落选","fatigue":"N/A","age":23},
+    "戈登": {"club":"纽卡斯尔","league":"英超","apps":35,"mins":2800,"goals":10,"assists":8,"rating":7.3,
+           "note":"可能首发左翼，压迫能力强","form":"良好","fatigue":"中","age":25},
+    "马杜埃克": {"club":"切尔西","league":"英超","apps":30,"mins":2000,"goals":7,"assists":6,"rating":7.0,
+           "note":"萨卡缺阵后可能首发右翼","form":"良好","fatigue":"低","age":24}
+  },
+
+  "克罗地亚": {
+    "莫德里奇": {"club":"AC米兰","league":"意甲","apps":34,"mins":2816,"goals":2,"assists":3,"rating":7.0,
+           "note":"40岁最后一舞！颧骨骨折戴面具！意甲2球3助数据平庸但大赛基因","form":"良好","fatigue":"中","age":40,"warmup_form":"一般"},
+    "科瓦契奇": {"club":"曼城","league":"英超","apps":32,"mins":2100,"goals":2,"assists":4,"rating":6.9,
+           "note":"⚠️脚踝伤6个月，恢复后状态存疑","form":"⚠️恢复中","fatigue":"低","age":31},
+    "格瓦迪奥尔": {"club":"曼城","league":"英超","apps":30,"mins":2500,"goals":1,"assists":2,"rating":7.0,
+           "note":"⚠️断腿后恢复，状态未满","form":"⚠️恢复中","fatigue":"低","age":24},
+    "佩里西奇": {"club":"热刺","league":"英超","apps":28,"mins":1800,"goals":5,"assists":6,"rating":7.1,
+           "note":"左翼老将","form":"良好","fatigue":"中","age":37},
+    "布迪米尔": {"club":"奥萨苏纳","league":"西甲","apps":35,"mins":2700,"goals":17,"assists":4,"rating":7.3,
+           "note":"西甲17球高效射手！克罗地亚头号火力点","form":"🔥极佳","fatigue":"中","age":34}
+  },
+
+  "加纳": {
+    "托马斯帕尔特伊": {"club":"阿森纳","league":"英超","apps":30,"mins":2400,"goals":2,"assists":3,"rating":7.0,
+           "note":"❌签证被加拿大拒绝！无法参赛！毁灭性打击","form":"❌缺席","fatigue":"N/A","age":32},
+    "库杜斯": {"club":"西汉姆联","league":"英超","apps":32,"mins":2600,"goals":8,"assists":7,"rating":7.2,
+           "note":"⚠️受伤缺阵","form":"❌缺席","fatigue":"N/A","age":25},
+    "乔丹阿尤": {"club":"水晶宫","league":"英超","apps":33,"mins":2200,"goals":7,"assists":5,"rating":6.9,
+           "note":"加纳队长，英超老将但状态一般","form":"一般","fatigue":"中高","age":34},
+    "塞梅诺": {"club":"伯恩茅斯","league":"英超","apps":36,"mins":2800,"goals":14,"assists":6,"rating":7.3,
+           "note":"英超14球但国家队34场仅3球——俱乐部和国家队是两个人","form":"良好","fatigue":"中高","age":26}
+  },
+
+  "巴拿马": {
+    "卡拉斯基利亚": {"club":"休斯顿迪纳摩","league":"MLS","apps":30,"mins":2500,"goals":5,"assists":8,"rating":7.2,
+           "note":"MLS球员→对北美环境完全适应","form":"良好","fatigue":"中","age":27},
+    "戴维斯": {"club":"科罗拉多急流","league":"MLS","apps":32,"mins":2700,"goals":2,"assists":5,"rating":7.0,
+           "note":"MLS后卫→熟悉北美场地","form":"良好","fatigue":"中","age":28},
+    "戈多伊": {"club":"纳什维尔SC","league":"MLS","apps":28,"mins":2300,"goals":1,"assists":3,"rating":6.8,
+           "note":"巴拿马队长","form":"一般","fatigue":"中","age":35},
+    "法哈多": {"club":"天主大学","league":"南美","apps":30,"mins":2400,"goals":15,"assists":4,"rating":7.2,
+           "note":"预选赛头号射手","form":"良好","fatigue":"中","age":30}
+  },
+
+  "乌兹别克斯坦": {
+    "肖穆罗多夫": {"club":"罗马","league":"意甲","apps":25,"mins":1200,"goals":5,"assists":2,"rating":6.7,
+           "note":"队长，队史射手王44球，但意甲只是轮换","form":"一般","fatigue":"低","age":30},
+    "胡桑诺夫": {"club":"曼城","league":"英超","apps":18,"mins":950,"goals":0,"assists":0,"rating":6.6,
+           "note":"曼城轮换中卫，几乎没有出场时间","form":"一般","fatigue":"低","age":22},
+    "法伊祖拉耶夫": {"club":"莫斯科中央陆军","league":"俄超","apps":28,"mins":2300,"goals":7,"assists":9,"rating":7.3,
+           "note":"22岁新星，2023亚洲最佳青年","form":"良好","fatigue":"中","age":22},
+    "马沙里波夫": {"club":"利雅得胜利","league":"沙特联","apps":20,"mins":800,"goals":1,"assists":3,"rating":6.5,
+           "note":"⚠️背部伤疑，C罗队友但几乎没上场","form":"⚠️存疑","fatigue":"低","age":31}
+  },
+
+  "哥伦比亚": {
+    "路易斯迪亚斯": {"club":"拜仁慕尼黑","league":"德甲","apps":44,"mins":3400,"goals":22,"assists":22,"rating":8.2,
+           "note":"拜仁核心！44场22球22助，欧冠8强绝杀皇马！世界级","form":"🔥🔥巅峰","fatigue":"中高","age":29},
+    "J罗": {"club":"圣保罗","league":"巴甲","apps":30,"mins":2400,"goals":8,"assists":14,"rating":7.6,
+           "note":"34岁，巴甲助攻王——但巴甲强度≈欧洲二流联赛。美洲环境适应+地理位置优势","form":"良好","fatigue":"低","age":34},
+    "杜兰": {"club":"阿斯顿维拉","league":"英超","apps":34,"mins":2000,"goals":14,"assists":3,"rating":7.2,
+           "note":"英超年轻射手，冲击力强","form":"良好","fatigue":"中","age":22},
+    "金特罗": {"club":"竞技俱乐部","league":"阿甲","apps":28,"mins":2100,"goals":6,"assists":10,"rating":7.4,
+           "note":"阿甲状态出色，但联赛强度有限","form":"良好","fatigue":"中","age":33}
+  },
+
+  "已完赛参考球员": {
+    "梅西": {"club":"迈阿密国际","league":"MLS","apps":28,"mins":2400,"goals":22,"assists":16,"rating":8.4,
+           "note":"MLS全明星，提前适应美洲。阿根廷3-0阿尔及利亚验证","form":"🔥极佳","fatigue":"低","age":38,"verified_result":"3-0胜"},
+    "姆巴佩": {"club":"皇马","league":"西甲","apps":42,"mins":3500,"goals":38,"assists":12,"rating":8.8,
+           "note":"世界第一人。法国3-1塞内加尔验证","form":"🔥🔥巅峰","fatigue":"中高","age":27,"verified_result":"3-1胜"},
+    "哈兰德": {"club":"曼城","league":"英超","apps":45,"mins":3800,"goals":42,"assists":8,"rating":8.6,
+           "note":"英超金靴。挪威4-1伊拉克验证","form":"🔥极佳","fatigue":"中高","age":25,"verified_result":"4-1胜"},
+    "孙兴慜": {"club":"洛杉矶FC","league":"MLS","apps":25,"mins":2000,"goals":0,"assists":2,"rating":6.2,
+           "note":"❌MLS赛季0进球！状态断崖式下滑。→验证了球员个体状态>球队排名","form":"❌极差","fatigue":"中","age":33},
+    "李刚仁": {"club":"巴黎圣日耳曼","league":"法甲","apps":22,"mins":800,"goals":2,"assists":3,"rating":6.7,
+           "note":"PSG欧冠冠军！出场少=状态保养好+心态极佳→证明了疲劳度系数有效性","form":"良好","fatigue":"极低","age":25}
+  },
+
+  "年龄衰减规则": {
+    "_note":"v6.1新增：超过33岁自动应用年龄衰减系数",
+    "33-35岁": 0.92,
+    "36-38岁": 0.82,
+    "39-40岁": 0.70,
+    "41岁及以上": 0.55,
+    "例外": "门将不应用此规则"
+  },
+
+  "联赛强度系数": {
+    "英超":1.00,"西甲":1.00,"德甲":1.00,"意甲":0.98,"法甲":0.93,
+    "葡超":0.78,"荷甲":0.76,"比甲":0.72,
+    "沙特联":0.45,"土超":0.62,"俄超":0.58,
+    "MLS":0.50,"巴甲":0.55,"阿甲":0.52,"墨超":0.50
+  }
+}
