@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash",
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
+      "WebSearch",
+      "WebFetch",
+      "TaskCreate",
+      "TaskUpdate",
+      "TaskList",
+      "TaskGet",
+      "Agent",
+      "Skill",
+      "EnterPlanMode",
+      "ExitPlanMode",
+      "NotebookEdit"
+    ],
+    "defaultMode": "dontAsk",
+    "additionalDirectories": [
+      "D:\\ai\\世界杯\\2026-worldcup-predictions"
+    ]
+  },
+  "autoMemoryEnabled": true
+}
