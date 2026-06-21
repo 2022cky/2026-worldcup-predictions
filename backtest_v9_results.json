@@ -1,0 +1,277 @@
+{
+  "total": 33,
+  "direction": 20,
+  "direction_pct": 60.60606060606061,
+  "exact": 5,
+  "exact_pct": 15.151515151515152,
+  "close_correct": 2,
+  "close_total": 3,
+  "big_correct": 17,
+  "big_total": 26,
+  "results": [
+    {
+      "match": "墨西哥 vs 南非",
+      "actual": "2-0",
+      "pred": "2-0",
+      "dir_ok": true,
+      "exact_ok": true,
+      "v9_diff": 2.719
+    },
+    {
+      "match": "韩国 vs 捷克",
+      "actual": "2-1",
+      "pred": "2-1",
+      "dir_ok": true,
+      "exact_ok": true,
+      "v9_diff": 0.162
+    },
+    {
+      "match": "加拿大 vs 波黑",
+      "actual": "1-1",
+      "pred": "2-0",
+      "dir_ok": false,
+      "exact_ok": false,
+      "v9_diff": 2.305
+    },
+    {
+      "match": "美国 vs 巴拉圭",
+      "actual": "4-1",
+      "pred": "2-0",
+      "dir_ok": true,
+      "exact_ok": false,
+      "v9_diff": 2.247
+    },
+    {
+      "match": "卡塔尔 vs 瑞士",
+      "actual": "1-1",
+      "pred": "2-1",
+      "dir_ok": false,
+      "exact_ok": false,
+      "v9_diff": 0.298
+    },
+    {
+      "match": "巴西 vs 摩洛哥",
+      "actual": "1-1",
+      "pred": "2-1",
+      "dir_ok": false,
+      "exact_ok": false,
+      "v9_diff": 1.542
+    },
+    {
+      "match": "海地 vs 苏格兰",
+      "actual": "0-1",
+      "pred": "1-0",
+      "dir_ok": false,
+      "exact_ok": false,
+      "v9_diff": 0.468
+    },
+    {
+      "match": "澳大利亚 vs 土耳其",
+      "actual": "2-0",
+      "pred": "2-1",
+      "dir_ok": true,
+      "exact_ok": false,
+      "v9_diff": 0.059
+    },
+    {
+      "match": "德国 vs 库拉索",
+      "actual": "7-1",
+      "pred": "2-0",
+      "dir_ok": true,
+      "exact_ok": false,
+      "v9_diff": 1.998
+    },
+    {
+      "match": "荷兰 vs 日本",
+      "actual": "2-2",
+      "pred": "1-0",
+      "dir_ok": false,
+      "exact_ok": false,
+      "v9_diff": 0.771
+    },
+    {
+      "match": "科特迪瓦 vs 厄瓜多尔",
+      "actual": "1-0",
+      "pred": "2-1",
+      "dir_ok": true,
+      "exact_ok": false,
+      "v9_diff": 0.383
+    },
+    {
+      "match": "瑞典 vs 突尼斯",
+      "actual": "5-1",
+      "pred": "2-0",
+      "dir_ok": true,
+      "exact_ok": false,
+      "v9_diff": 1.723
+    },
+    {
+      "match": "西班牙 vs 佛得角",
+      "actual": "0-0",
+      "pred": "2-1",
+      "dir_ok": false,
+      "exact_ok": false,
+      "v9_diff": 1.231
+    },
+    {
+      "match": "比利时 vs 埃及",
+      "actual": "1-1",
+      "pred": "1-0",
+      "dir_ok": false,
+      "exact_ok": false,
+      "v9_diff": 0.801
+    },
+    {
+      "match": "沙特 vs 乌拉圭",
+      "actual": "1-1",
+      "pred": "1-2",
+      "dir_ok": false,
+      "exact_ok": false,
+      "v9_diff": -1.198
+    },
+    {
+      "match": "伊朗 vs 新西兰",
+      "actual": "2-2",
+      "pred": "2-1",
+      "dir_ok": false,
+      "exact_ok": false,
+      "v9_diff": 1.176
+    },
+    {
+      "match": "法国 vs 塞内加尔",
+      "actual": "3-1",
+      "pred": "1-0",
+      "dir_ok": true,
+      "exact_ok": false,
+      "v9_diff": 0.638
+    },
+    {
+      "match": "伊拉克 vs 挪威",
+      "actual": "1-4",
+      "pred": "1-2",
+      "dir_ok": true,
+      "exact_ok": false,
+      "v9_diff": -0.966
+    },
+    {
+      "match": "阿根廷 vs 阿尔及利亚",
+      "actual": "3-0",
+      "pred": "2-0",
+      "dir_ok": true,
+      "exact_ok": false,
+      "v9_diff": 2.583
+    },
+    {
+      "match": "奥地利 vs 约旦",
+      "actual": "3-1",
+      "pred": "2-0",
+      "dir_ok": true,
+      "exact_ok": false,
+      "v9_diff": 1.69
+    },
+    {
+      "match": "葡萄牙 vs 刚果(金)",
+      "actual": "1-1",
+      "pred": "2-1",
+      "dir_ok": false,
+      "exact_ok": false,
+      "v9_diff": 1.05
+    },
+    {
+      "match": "英格兰 vs 克罗地亚",
+      "actual": "4-2",
+      "pred": "1-2",
+      "dir_ok": false,
+      "exact_ok": false,
+      "v9_diff": -0.014
+    },
+    {
+      "match": "加纳 vs 巴拿马",
+      "actual": "1-0",
+      "pred": "1-0",
+      "dir_ok": true,
+      "exact_ok": true,
+      "v9_diff": 0.592
+    },
+    {
+      "match": "乌兹别克斯坦 vs 哥伦比亚",
+      "actual": "1-3",
+      "pred": "0-2",
+      "dir_ok": true,
+      "exact_ok": false,
+      "v9_diff": -1.958
+    },
+    {
+      "match": "捷克 vs 南非",
+      "actual": "1-1",
+      "pred": "2-1",
+      "dir_ok": false,
+      "exact_ok": false,
+      "v9_diff": 1.185
+    },
+    {
+      "match": "瑞士 vs 波黑",
+      "actual": "4-1",
+      "pred": "2-1",
+      "dir_ok": true,
+      "exact_ok": false,
+      "v9_diff": 1.025
+    },
+    {
+      "match": "加拿大 vs 卡塔尔",
+      "actual": "6-0",
+      "pred": "2-0",
+      "dir_ok": true,
+      "exact_ok": false,
+      "v9_diff": 1.714
+    },
+    {
+      "match": "墨西哥 vs 韩国",
+      "actual": "1-0",
+      "pred": "2-0",
+      "dir_ok": true,
+      "exact_ok": false,
+      "v9_diff": 2.362
+    },
+    {
+      "match": "美国 vs 澳大利亚",
+      "actual": "2-0",
+      "pred": "2-0",
+      "dir_ok": true,
+      "exact_ok": true,
+      "v9_diff": 2.428
+    },
+    {
+      "match": "苏格兰 vs 摩洛哥",
+      "actual": "0-1",
+      "pred": "0-1",
+      "dir_ok": true,
+      "exact_ok": true,
+      "v9_diff": -0.751
+    },
+    {
+      "match": "巴西 vs 海地",
+      "actual": "3-0",
+      "pred": "3-1",
+      "dir_ok": true,
+      "exact_ok": false,
+      "v9_diff": 2.567
+    },
+    {
+      "match": "土耳其 vs 巴拉圭",
+      "actual": "0-1",
+      "pred": "1-0",
+      "dir_ok": false,
+      "exact_ok": false,
+      "v9_diff": 0.461
+    },
+    {
+      "match": "荷兰 vs 瑞典",
+      "actual": "5-1",
+      "pred": "2-1",
+      "dir_ok": true,
+      "exact_ok": false,
+      "v9_diff": 0.925
+    }
+  ]
+}

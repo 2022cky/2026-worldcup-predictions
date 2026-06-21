@@ -3,12 +3,10 @@
 import sys, io, os
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-# Add parent to path and import the prediction function
-sys.path.insert(0, r'E:\ai\世界杯')
-
-# Replicate the core functions directly for backtesting
 import json
 from collections import defaultdict
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 FIFA_RANK = {
     "Argentina":1,"France":2,"Spain":3,"England":4,"Brazil":5,"Portugal":6,
@@ -36,7 +34,7 @@ def rank(tn):
     return FIFA_RANK.get(tn, 80)
 
 # Load data for trends
-with open(r'E:\ai\世界杯\worldcup_data.json', 'r', encoding='utf-8') as f:
+with open(os.path.join(BASE_DIR, 'worldcup_data.json'), 'r', encoding='utf-8') as f:
     wc = json.load(f)
 
 FINAL_STATES = {"STATUS_FINAL", "STATUS_FULL_TIME"}
