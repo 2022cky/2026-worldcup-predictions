@@ -95,12 +95,54 @@ pip install Pillow pytesseract
 python predict.py  # 拉取6/11-6/20全部ESPN数据到 worldcup_data.json
 ```
 
+### 方法4: 小红书直播间实时数据 (OpenCLI浏览器控制)
+
+> **2026.06.22 新增 — 绕过WebFetch封锁，直接抓取小红书世界杯官方直播数据**
+
+```bash
+# 前置: OpenCLI Chrome扩展必须已安装且Chrome打开
+# 验证: opencli doctor → 显示 [OK] Extension: connected
+
+# 步骤1: 打开直播页
+opencli browser xhs_live open "https://www.xiaohongshu.com/livestream/570329950770972762?source=worldcup26_web_main"
+
+# 步骤2: 等待加载
+opencli browser xhs_live wait time 5
+
+# 步骤3: 获取页面元素列表(找到"数据"标签的索引)
+opencli browser xhs_live state
+
+# 步骤4: 点击"数据"标签(索引号来自步骤3的[98]附近,每次可能变)
+opencli browser xhs_live click <数据标签索引>
+
+# 步骤5: 等待数据面板渲染
+opencli browser xhs_live wait time 3
+
+# 步骤6: 提取完整内容(含实时统计数据+球场事件+积分榜)
+opencli browser xhs_live extract
+```
+
+**小红书直播数据包含**:
+- ✅ 实时控球率/射门/射正/角球/越位/犯规/黄牌/红牌/点球/传球成功率
+- ✅ 完整球场事件时间线(进球/换人/红黄牌/越位/VAR)
+- ✅ 换人详情: 第几分钟 + 谁换谁 + 哪个队
+- ✅ G组积分榜
+- ❌ 弹幕内容是观众讨论,不是官方数据,不要引用
+
+**与ESPN API互补**: ESPN API比赛进行中只推送红黄牌,不推送换人事件; 小红书直播有全量事件。
+
+### 方法5: 运行 predict.py 批量刷新
+
+```bash
+python predict.py  # 拉取6/11-6/20全部ESPN数据到 worldcup_data.json
+```
+
 ### WebFetch 已知限制
 
 - **ESPN/sportingnews/bleacherreport/fifa.com** 等海外域名被安全策略封锁(WebFetch无法访问)
 - **懂球帝/zhibo8/虎扑/599比分** 同样被封锁
-- **小红书/微博** 直播页无法Fetch
-- **唯一通路**: Python urllib直连API (方法1) 或 WebSearch 搜索结果摘要
+- **小红书/微博** 直播页WebFetch无法抓取动态JS内容
+- **解决方案**: 方法1(Python API) + 方法4(OpenCLI浏览器) + WebSearch 搜索结果摘要
 
 ---
 

@@ -796,6 +796,37 @@ def predict_halftime(ev):
         fd += 0.01; fh -= 0.005; fa -= 0.005
         adjustments.append(f"超长补时: +{extra_min}'→比赛中断多, 平局+1%")
 
+    # ── A7: 红牌冲击 (11v10→巨大劣势) ──
+    red_count = sum(1 for d in details if d.get("type", {}).get("text") == "Red Card")
+    if red_count > 0:
+        # 判断谁吃了红牌
+        for d in details:
+            if d.get("type", {}).get("text") == "Red Card":
+                red_team_id = d.get("team", {}).get("id", "")
+                red_players = [a["displayName"] for a in d.get("athletesInvolved", [])]
+                # team id 459 = Belgium from ESPN
+                if red_team_id == ev.get("competitions",[{}])[0].get("competitors",[{}])[0].get("team",{}).get("id",""):
+                    # 主队吃红牌
+                    fh -= 0.18; fd -= 0.02; fa += 0.20
+                    side = hcn
+                else:
+                    # 客队吃红牌
+                    fa -= 0.18; fd -= 0.02; fh += 0.20
+                    side = acn
+                adjustments.append(f"🔴红牌: {side}{','.join(red_players)}罚下→11v10, 胜率-18%")
+                # 剩余时间加权 — 越早红牌影响越大
+                try:
+                    minute_clock = int(ls["clock"].split("'")[0].split("+")[0])
+                    remaining = 90 - minute_clock
+                    extra_bonus = min(0.08, remaining * 0.003)  # 每剩余1分钟约+0.3%
+                    if red_team_id == ev.get("competitions",[{}])[0].get("competitors",[{}])[0].get("team",{}).get("id",""):
+                        fa += extra_bonus; fh -= extra_bonus
+                    else:
+                        fh += extra_bonus; fa -= extra_bonus
+                    adjustments.append(f"  剩余{remaining}分钟→少人方额外-{_pct(extra_bonus):.0f}%")
+                except:
+                    pass
+
     # 归一化
     tot = fh + fd + fa
     fh, fd, fa = fh/tot, fd/tot, fa/tot
