@@ -126,9 +126,10 @@ opencli browser xhs_live extract
 
 **与ESPN API互补**: ESPN API有实时stats但编码问题常见; 小红书赛程页是**最可靠的赛后比分来源**(中文+结构化)。
 
-### 方法4B: 小红书世界杯首页 → 点击直播卡片 (赛中实时数据)
+### 方法4B: 小红书直播数据面板 — 赛中换人/红黄牌/事件 (ESPN不推送)
 
-> 如果比赛正在进行中,赛程页可能不显示实时比分 → 用此方法进入直播间
+> **ESPN API 盲区**: 比赛进行中只推送**进球事件**，不推送换人/红黄牌/越位  
+> **小红书直播数据面板** 有全量事件: 第几分钟+谁换谁+哪个队+红黄牌详情
 
 ```bash
 # 步骤1: 打开世界杯首页
@@ -137,14 +138,40 @@ opencli browser xhs_live open "https://www.xiaohongshu.com/worldcup26?wcup_sourc
 # 步骤2: 等待加载
 opencli browser xhs_live wait time 5
 
-# 步骤3: 找到正在进行的比赛卡片 → 点击"点击进入直播间"按钮
-opencli browser xhs_live state    # 搜索 "直播中" 或 "挪威 vs 塞内加尔" 找到按钮索引
+# 步骤3: 找到正在比赛的卡片 → 点击"点击进入直播间"
+opencli browser xhs_live state | grep "直播中\|进入直播间"
+# 找到按钮索引 → 点击
 opencli browser xhs_live click <按钮索引>
 
-# 步骤4: 等待直播加载 → 提取
+# 步骤4: 等待视频加载 → 找到并点击"数据"标签
 opencli browser xhs_live wait time 5
+opencli browser xhs_live state | grep "数据\|tab"
+# 在视频播放器界面中找到"数据"tab索引 → 点击
+opencli browser xhs_live click <数据tab索引>
+
+# 步骤5: 等待数据面板渲染 → 提取完整事件
+opencli browser xhs_live wait time 3
 opencli browser xhs_live extract
 ```
+
+**直播数据面板包含** (ESPN API盲区):
+- ✅ 换人详情: 第几分钟 + 谁换谁 + 哪个队
+- ✅ 红黄牌: 时间+球员+原因
+- ✅ 越位/VAR/伤停补时
+- ✅ 实时控球率/射门/射正/角球/犯规/传球成功率
+- ❌ 赛后数据面板可能显示"数据将在赛后更新"
+
+**ESPN API vs 小红书对比**:
+| 数据项 | ESPN API | 小红书数据面板 |
+|--------|----------|---------------|
+| 比分 | ✅ 实时 | ✅ 实时 |
+| 进球事件 | ✅ | ✅ |
+| 换人 | ❌ 不推送 | ✅ 全量 |
+| 红黄牌 | ⚠️ 部分推送 | ✅ 全量 |
+| 控球/射门 | ✅ | ✅ |
+| 越位/VAR | ❌ | ✅ |
+
+> ⚠️ **注意**: 直播结束后数据面板可能关闭，优先在比赛进行中抓取。
 
 ### 方法5: 运行 predict.py 批量刷新
 
