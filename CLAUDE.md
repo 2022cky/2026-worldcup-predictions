@@ -95,46 +95,63 @@ pip install Pillow pytesseract
 python predict.py  # 拉取6/11-6/20全部ESPN数据到 worldcup_data.json
 ```
 
-### 方法4: 小红书直播间实时数据 (OpenCLI浏览器控制)
+### 方法4: 小红书世界杯赛程页 (OpenCLI浏览器控制 — 推荐赛后核实)
 
-> **2026.06.22 新增 — 绕过WebFetch封锁，直接抓取小红书世界杯官方直播数据**
+> **2026.06.23 修正** — 直播页需登录,改用**赛程页**直接抓取所有完赛比分
 
 ```bash
-# 前置: OpenCLI Chrome扩展必须已安装且Chrome打开
+# 前置: OpenCLI Chrome扩展已安装且Chrome打开
+# 安装: npm install -g @jackwener/opencli
+# 扩展: 从 https://github.com/jackwener/opencli/releases 下载解压 → chrome://extensions 加载
 # 验证: opencli doctor → 显示 [OK] Extension: connected
 
-# 步骤1: 打开直播页
-opencli browser xhs_live open "https://www.xiaohongshu.com/livestream/570329950770972762?source=worldcup26_web_main"
+# 步骤1: 打开世界杯赛程页(无需登录,所有完赛比分直接可见)
+opencli browser xhs_live open "https://www.xiaohongshu.com/worldcup26/fixtures?wcup_source=web_sidebar_entry"
+
+# 步骤2: 等待数据加载
+opencli browser xhs_live wait time 5
+
+# 步骤3: 提取全部赛程数据(含比分/队名/比赛状态/预约人数)
+opencli browser xhs_live extract
+```
+
+**赛程页数据包含**:
+- ✅ 所有已完赛比赛的**比分** (如"挪威 3-1 塞内加尔")
+- ✅ 比赛状态 (已完赛显示比分, 未赛显示"---" + 预约人数)
+- ✅ 比赛标题 (如"哈兰德对阵马内")
+- ✅ 分组/轮次标注 (如"I组第二轮")
+- ✅ 开赛时间 (如"08:00")
+- ❌ 不含实时控球率/射门等深度统计数据(赛后才更新)
+- ❌ 不含换人/红黄牌事件线
+
+**与ESPN API互补**: ESPN API有实时stats但编码问题常见; 小红书赛程页是**最可靠的赛后比分来源**(中文+结构化)。
+
+### 方法4B: 小红书世界杯首页 → 点击直播卡片 (赛中实时数据)
+
+> 如果比赛正在进行中,赛程页可能不显示实时比分 → 用此方法进入直播间
+
+```bash
+# 步骤1: 打开世界杯首页
+opencli browser xhs_live open "https://www.xiaohongshu.com/worldcup26?wcup_source=web_sidebar_entry"
 
 # 步骤2: 等待加载
 opencli browser xhs_live wait time 5
 
-# 步骤3: 获取页面元素列表(找到"数据"标签的索引)
-opencli browser xhs_live state
+# 步骤3: 找到正在进行的比赛卡片 → 点击"点击进入直播间"按钮
+opencli browser xhs_live state    # 搜索 "直播中" 或 "挪威 vs 塞内加尔" 找到按钮索引
+opencli browser xhs_live click <按钮索引>
 
-# 步骤4: 点击"数据"标签(索引号来自步骤3的[98]附近,每次可能变)
-opencli browser xhs_live click <数据标签索引>
-
-# 步骤5: 等待数据面板渲染
-opencli browser xhs_live wait time 3
-
-# 步骤6: 提取完整内容(含实时统计数据+球场事件+积分榜)
+# 步骤4: 等待直播加载 → 提取
+opencli browser xhs_live wait time 5
 opencli browser xhs_live extract
 ```
-
-**小红书直播数据包含**:
-- ✅ 实时控球率/射门/射正/角球/越位/犯规/黄牌/红牌/点球/传球成功率
-- ✅ 完整球场事件时间线(进球/换人/红黄牌/越位/VAR)
-- ✅ 换人详情: 第几分钟 + 谁换谁 + 哪个队
-- ✅ G组积分榜
-- ❌ 弹幕内容是观众讨论,不是官方数据,不要引用
-
-**与ESPN API互补**: ESPN API比赛进行中只推送红黄牌,不推送换人事件; 小红书直播有全量事件。
 
 ### 方法5: 运行 predict.py 批量刷新
 
 ```bash
-python predict.py  # 拉取6/11-6/20全部ESPN数据到 worldcup_data.json
+python predict.py --date 20260623    # 预测单天
+python predict.py --all              # 拉取+预测+复盘+回测
+python predict.py --review           # 复盘最近完赛
 ```
 
 ### WebFetch 已知限制
@@ -142,7 +159,7 @@ python predict.py  # 拉取6/11-6/20全部ESPN数据到 worldcup_data.json
 - **ESPN/sportingnews/bleacherreport/fifa.com** 等海外域名被安全策略封锁(WebFetch无法访问)
 - **懂球帝/zhibo8/虎扑/599比分** 同样被封锁
 - **小红书/微博** 直播页WebFetch无法抓取动态JS内容
-- **解决方案**: 方法1(Python API) + 方法4(OpenCLI浏览器) + WebSearch 搜索结果摘要
+- **解决方案**: 方法1(Python API) + 方法4(OpenCLI赛程页) + WebSearch 搜索结果摘要
 
 ---
 

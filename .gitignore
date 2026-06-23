@@ -3,6 +3,9 @@
 .claude/scheduled_tasks.json
 .claude/scheduled_tasks.lock
 
+# OpenCLI 扩展（工具安装，非项目代码）
+.claude/opencli-extension/
+
 # Python
 __pycache__/
 *.pyc
