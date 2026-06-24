@@ -1,6 +1,6 @@
 # 2026世界杯预测项目 - 项目规则
 
-> v11.14: 大巴时间规律 — openfootball数据验证: 0-0到75'=97%概率0-0到底
+> v11.15: 复盘教训必须数据先行 — "先跑数据再写教训"写入铁律
 
 ---
 
@@ -108,6 +108,30 @@
 ---
 
 ## 🔬 分析原则
+
+### 零、复盘教训必须数据先行 (不可协商)
+
+> ⚠️ 6/24复盘教训"大巴守不住75分钟"被openfootball数据直接推翻 — 这是一次根源性错误。
+
+**教训提炼流程 (按顺序, 不准跳步):**
+
+```
+[1] 先跑数据: 用 openfootball / historical_analyzer.py 验证假设
+    → 不要先写教训再找数据支持, 这是倒因为果
+[2] 数据说啥就写啥: 如果数据不支持你的"直觉", 修改直觉, 不修改数据
+[3] 标注数据来源: 每条教训必须附数据支撑 (如 "openfootball 2026: 61/63 = 97%")
+[4] 没有数据就不写: 如果某个"教训"纯靠感觉, 写成"待验证假设", 不要写成结论
+```
+
+**复盘数据验证清单:**
+
+```bash
+# 每次复盘必须跑:
+python openfootball_data.py 2026 --review "复盘文件路径"      # 自动对比预测vs实际
+python historical_analyzer.py --pattern "0-0 at 75 min"       # 验证特定假设
+# 或直接查 openfootball JSON:
+python -c "import json; data=json.load(open('data/openfootball/2026/worldcup.json')); ..."
+```
 
 ### 三条铁律
 
