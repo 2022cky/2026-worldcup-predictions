@@ -172,25 +172,38 @@
 ## 🔧 数据获取工具
 
 ### 主力: AnySearch (Skill)
+> 前置: 每台新机器需安装 AnySearch Skill → 见 `setup.md`
 ```bash
-python C:\Users\55875\.claude\skills\anysearch\scripts\anysearch_cli.py search "query" --max_results 5
-python C:\Users\55875\.claude\skills\anysearch\scripts\anysearch_cli.py batch_search --queries '[...]'   # max 5 queries
-python C:\Users\55875\.claude\skills\anysearch\scripts\anysearch_cli.py extract "URL"
+# 统一入口: 用 Skill 名调用, 不用写死路径
+# Claude Code 会通过 runtime.conf 自动定位 CLI
+```
+日常命令:
+```bash
+# search:    python ~/.claude/skills/anysearch/scripts/anysearch_cli.py search "query" --max_results 5
+# batch:     python ~/.claude/skills/anysearch/scripts/anysearch_cli.py batch_search --queries '[...]'
+# extract:   python ~/.claude/skills/anysearch/scripts/anysearch_cli.py extract "URL"
 ```
 
 ### 实时: ESPN API
 ```bash
-python -c "import urllib.request, json; url='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard'; req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0'}); data=urllib.request.urlopen(req,timeout=15).read(); ..."
+python -c "
+import urllib.request, json
+url = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard'
+req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+data = urllib.request.urlopen(req, timeout=15).read()
+j = json.loads(data)
+# ... 按需过滤
+"
 ```
 - 按日: `scoreboard?dates=YYYYMMDD`
 - `status.type.state='in'` = 正在踢, `'pre'` = 未开始
-- 字段: score, displayClock, possessionPct, shotsOnTarget, wonCorners, foulsCommitted
 
 ### 赛后验证: openfootball JSON
+> 前置: 每台新机器需 `cd data && git clone --depth 1 https://github.com/openfootball/worldcup.json.git openfootball`
 ```bash
-cd E:/ai/世界杯 && python openfootball_data.py 2026 --standings    # 积分榜
-python openfootball_data.py 2026 --scorers                          # 射手榜
-python openfootball_data.py 2026 --review "预测文件.md"              # 自动复盘
+python openfootball_data.py 2026 --standings    # 积分榜
+python openfootball_data.py 2026 --scorers       # 射手榜
+python openfootball_data.py 2026 --review "file" # 自动复盘
 ```
 
 ### 赛后比分: 小红书赛程页 (OpenCLI)
@@ -206,10 +219,11 @@ opencli browser xhs_live extract
 
 | 文件 | 用途 |
 |------|------|
+| `CLAUDE.md` | 本文件 — 项目所有规则 |
+| `setup.md` | 新机器初始化指南 |
 | `openfootball_data.py` | 结构化数据引擎 (积分榜/复盘/射手榜) |
 | `historical_analyzer.py` | 历史分析 (冷门频率/比分分布/趋势) |
-| `match_analysis_template.md` | 4模块26子项标准模板 (可选使用) |
-| `data/openfootball/` | 1930-2026 JSON (需单独 git clone) |
+| `match_analysis_template.md` | 4模块26子项标准模板 (配合 CLAUDE.md 使用) |
+| `data/openfootball/` | 1930-2026 JSON (需手动 clone, 见 setup.md) |
 | `latest_team_news.md` | 最新伤病/阵容汇总 |
 | `historical_upset_patterns.md` | 历史冷门模式数据库 |
-| `CLAUDE.md` | 本文件 — 项目所有规则 |
