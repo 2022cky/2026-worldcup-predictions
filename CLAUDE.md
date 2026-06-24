@@ -219,6 +219,3 @@ python openfootball_data.py 2026 --standings
 python openfootball_data.py 2026 --review "file"
 ```
 
----
-
-*生成时间: 2026年6月25日 北京时间*
