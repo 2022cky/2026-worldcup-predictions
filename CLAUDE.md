@@ -1,6 +1,6 @@
 # 2026世界杯预测项目 - 项目规则
 
-> v11.21: ESPN API时区陷阱 — dates参数返回美东日期, 必须手动UTC+8转北京时间 — openfootball 2026 6/11-6/22是真实数据(93%验证通过)
+> v11.22: ESPN API标准调用流程 — 禁止dates参数, 强制UTC+8换算+重新分组
 
 ---
 
@@ -8,31 +8,7 @@
 
 - **所有时间统一使用北京时间 (UTC+8)**，标注为"北京时间"
 - 文档生成时间也标注北京时间
-
-### ⚠️ ESPN API 时区陷阱 (6/25复盘又犯)
-
-> ESPN API `scoreboard?dates=YYYYMMDD` 返回的是**美国当地日期**的比赛，不是北京时间日期。
-
-```
-ESPN API 示例:
-  dates=20260624 返回6场 → 但这6场在美国当地时间各不相同
-  → 前4场 UTC 19:00Z/22:00Z = 北京时间次日 03:00/06:00
-  → 后2场 UTC 01:00Z(+1) = 北京时间次日 09:00
-  → 不能直接把 dates=YYYYMMDD 的结果全部归到北京时间同一天!
-```
-
-**正确做法:**
-```bash
-# 1. 拉取比赛时不要用 dates 过滤，用不带参数的 scoreboard
-# 2. 对每场比赛，从 date 字段提取 UTC 时间，手动 +8 换算北京时间
-# 3. 按北京时间日期重新分组，而不是按 ESPN 返回的日期分组
-python -c "
-# 正确: 用 event['date'] 字段(UTC)，手动 +8 得到北京时间
-utc_hour = int(date_str[11:13])
-bjt_hour = (utc_hour + 8) % 24
-bjt_day = int(date_str[8:10]) + (1 if utc_hour + 8 >= 24 else 0)
-"
-```
+- **ESPN API 返回 UTC 时间，每次必须 UTC+8 换算** → 标准代码见 `ESPN API` 工具章节
 
 ---
 
@@ -162,8 +138,8 @@ bjt_day = int(date_str[8:10]) + (1 if utc_hour + 8 >= 24 else 0)
 
 ```bash
 # 可靠数据源 (按优先级):
-# 1. ESPN API (实时, 最可靠)
-python -c "import urllib.request, json; ... scoreboard?dates=YYYYMMDD"
+# 1. ESPN API (实时, 最可靠) — 见 ESPN API 工具章节标准流程
+#    禁止 dates= 参数, 必须 UTC+8 换算北京时间
 # 2. AnySearch (赛后新闻, 二手但可交叉验证)
 python ~/.claude/skills/anysearch/scripts/anysearch_cli.py search "query"
 # 3. openfootball JSON: 1930-2022 = 可靠; 2026 = 6/11-6/22可靠, 6/23+需交叉验证ESPN
@@ -266,8 +242,8 @@ Read <找到的文件>             # 逐字读取, 提取每场的预测比分
 ```
 
 ```
-[1] ESPN API 确认当天实际比赛 + 比分
-    python -c "import urllib.request, json; ... scoreboard?dates=YYYYMMDD"
+[1] ESPN API 确认当天实际比赛 + 比分 (使用标准流程: UTC+8换算)
+    python -c "import urllib.request, json; ... scoreboard ..."
 [2] ✅ 已完成: Glob搜索 + Read原始预测文件 (见硬性第一步)
 [3] AnySearch 交叉验证比分 + 球员评分
 [4] 逐场对比: 表格写的预测 = [2]读到的原始预测
@@ -328,18 +304,46 @@ Read <找到的文件>             # 逐字读取, 提取每场的预测比分
 ```
 
 ### 实时: ESPN API
+
+> ⚠️ **ESPN API 所有时间均为 UTC（协调世界时），不是北京时间。**
+> `scoreboard?dates=YYYYMMDD` 的 YYYYMMDD 是美国当地日期，与北京时间有8小时时差。
+> **禁止直接用 `dates=` 参数按北京日期筛选。** 正确做法：拉全量 → UTC+8 换算 → 重新分组。
+
+**标准调用流程（每次拉取赛程/比分必须遵循）：**
+
 ```bash
+# 第1步: 拉取全量 scoreboard（不带 dates 参数）
 python -c "
 import urllib.request, json
+from datetime import datetime, timedelta
+
 url = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard'
 req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-data = urllib.request.urlopen(req, timeout=15).read()
-j = json.loads(data)
-# ... 按需过滤
+j = json.loads(urllib.request.urlopen(req, timeout=15).read())
+
+# 第2步: 逐场 UTC+8 换算北京时间，按北京日期重新分组
+for evt in j.get('events', []):
+    utc_str = evt.get('date', '')  # 格式: '2026-06-24T19:00Z'
+    utc_dt = datetime.fromisoformat(utc_str.replace('Z', '+00:00'))
+    bjt_dt = utc_dt + timedelta(hours=8)  # UTC+8
+    
+    bjt_date = bjt_dt.strftime('%Y-%m-%d')  # 北京时间日期
+    bjt_time = bjt_dt.strftime('%H:%M')      # 北京时间时间
+    
+    # 第3步: 按 bjt_date 分组... 后续按需处理
 "
 ```
-- 按日: `scoreboard?dates=YYYYMMDD`
-- `status.type.state='in'` = 正在踢, `'pre'` = 未开始
+
+| 字段 | 含义 | 示例 |
+|------|------|------|
+| `evt['date']` | UTC 时间 | `2026-06-24T19:00Z` |
+| UTC+8 后 | 北京时间 | `2026-06-25 03:00` |
+
+**关键规则：**
+- 永远用不带 `dates=` 的 scoreboard URL
+- 每场比赛独立计算北京时间日期
+- 预测/复盘文件的"X月X日" = 北京日期，不是 ESPN 返回的日期
+- `status.type.state`: `'pre'`=未开始, `'in'`=进行中, `'post'`=已结束
 
 ### 赛后验证: openfootball JSON
 > 前置: 每台新机器需 `cd data && git clone --depth 1 https://github.com/openfootball/worldcup.json.git openfootball`
