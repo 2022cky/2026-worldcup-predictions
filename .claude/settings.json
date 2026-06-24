@@ -19,10 +19,7 @@
       "ExitPlanMode",
       "NotebookEdit"
     ],
-    "defaultMode": "dontAsk",
-    "additionalDirectories": [
-      "D:\\ai\\世界杯\\2026-worldcup-predictions"
-    ]
+    "defaultMode": "dontAsk"
   },
   "autoMemoryEnabled": true
 }
