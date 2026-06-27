@@ -229,25 +229,75 @@ for evt in j.get('events', []):
 ### 赛中/半场
 
 ```
-[0] 比分确认 ≠ 大名单确认
-[1] AnySearch 确认26人大名单+本场替补
-[2] "建议换XX" → XX必须在替补名单中
-[3] "XX缺阵" → 必须有搜索结果支撑
-[4] 预测文档必须包含"已验证可用替补"
+[0] 🚨 FIFA API 拉全事件（进球/换人/黄红牌）→ 不需要搜索换人
+   → https://api.fifa.com/api/v3/live/football/{match_id}?language=en
+[1] ESPN API 补充统计数据（射门/角球/犯规）
+[2] 比分确认 ≠ 大名单确认
+[3] "建议换XX" → XX必须在替补名单中
+[4] "XX缺阵" → 必须有搜索结果支撑
+[5] 预测文档必须包含"已验证可用替补"
 ```
 
 ---
 
 ## 🔧 八、数据工具
 
-### AnySearch（主力搜索）
-```bash
-python ~/.claude/skills/anysearch/scripts/anysearch_cli.py search "query" --max_results 5
-python ~/.claude/skills/anysearch/scripts/anysearch_cli.py extract "URL"
+### 🚨 FIFA 官方 API（实时比赛事件 — 首选数据源）
+
+> **免费、无需 API Key、公开访问。** 一次调用返回全部事件（进球/换人/黄红牌/阵容/控球率/比赛时间）。
+
+```python
+import urllib.request, json
+
+# 标准调用
+url = 'https://api.fifa.com/api/v3/live/football/{match_id}?language=en'
+req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+data = json.loads(urllib.request.urlopen(req, timeout=15).read())
+
+# 提取换人/进球/黄红牌
+for side, team in [('HOME', data['HomeTeam']), ('AWAY', data['AwayTeam'])]:
+    for g in team.get('Goals', []):
+        print(f"⚽ {g['Minute']} {g['PlayerName'][0]['Description']}")
+    for s in team.get('Substitutions', []):
+        print(f"🔄 {s['Minute']} {s['PlayerOnName'][0]['Description']} IN / {s['PlayerOffName'][0]['Description']} OUT")
+    for b in team.get('Bookings', []):
+        card = '🟥' if b.get('CardType') == 2 else '🟨'
+        print(f"{card} {b['Minute']} {b['PlayerName'][0]['Description']}")
+    print(f"⚽ Goals: {len(team.get('Goals',[]))} | 🔄 Subs: {len(team.get('Substitutions',[]))} | 🟨 Bookings: {len(team.get('Bookings',[]))}")
 ```
 
-### ESPN API（实时数据）
+| 字段 | 含义 | 示例 |
+|------|------|------|
+| `MatchTime` | 当前比赛分钟 | `"78'"` |
+| `MatchStatus` | 0=未开始, 1=上, 3=中场, 5=下, 10=结束 | `5` |
+| `HomeTeam.Score` / `AwayTeam.Score` | 当前比分 | `0` / `1` |
+| `Goals[].Minute` | 进球时间 | `"42'"` |
+| `Substitutions[].Minute` | 换人时间 | `"60'"` |
+| `Substitutions[].PlayerOffName[0].Description` | 被换下球员 | `"PEDRI"` |
+| `Substitutions[].PlayerOnName[0].Description` | 换上球员 | `"Fabian RUIZ"` |
+| `Bookings[].CardType` | 1=黄牌, 2=红牌 | `1` |
+| `Substitutions[].Reason` | 4=受伤, 0=战术 | `4` |
+| `BallPossession` | 控球率对象 | — |
 
+**match_id 获取：**
+- 从 FIFA 赛程日历: `https://api.fifa.com/api/v3/calendar/matches?date=2026-06-27` → 返回中 `IdMatch` 字段
+- 已知ID: `400021484`=乌拉圭vs西班牙, `400021485`=佛得角vs沙特阿拉伯
+- 从 FIFA 赛事中心 URL 提取: `fifa.com/en/match-centre/match/17/285023/289273/{match_id}`
+
+**🚨 注意:**
+- 球员名为英文全大写（如 `PEDRI`），需对照 Players 数组中的 `ShirtNumber` 确认译名
+- ESPN API 的 details 不返回换人 → FIFA API 是唯一直接返回换人的接口
+- 比 ESPN API 快 ~30 秒（FIFA 官方数据更近源头）
+
+### AnySearch（主力搜索）
+```bash
+python "C:/Users/Administrator/.claude/skills/anysearch-skill-2.1.0/scripts/anysearch_cli.py" search "query" --max_results 5
+python "C:/Users/Administrator/.claude/skills/anysearch-skill-2.1.0/scripts/anysearch_cli.py" extract "URL"
+```
+
+### ESPN API（统计补充 + 赛程发现）
+
+> FIFA API 提供事件（进球/换人/黄红牌），ESPN API 补充统计数据（射门/角球/犯规/越位/预期进球）。
 > 标准代码见 **一、时间与日期** 章节。核心: 拉全量 → UTC+8 → 重新分组。
 
 ### openfootball JSON（历史数据库 + 赛后验证）
