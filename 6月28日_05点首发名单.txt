@@ -1,0 +1,127 @@
+== 克罗地亚 vs 加纳 (Match #68) ==
+时间(UTC): 2026-06-27T21:00:00Z | Period=0
+
+【Croatia】 阵型: 4-2-3-1  |  主教练: Zlatko Dalić
+首发11人:
+  #1 Dominik LIVAKOVIC [门将]
+  #2 Josip STANISIC [后卫]
+  #3 Marin PONGRACIC [后卫]
+  #6 Josip SUTALO [后卫]
+  #8 Mateo KOVACIC [中场]
+  #10 Luka MODRIC [中场] (C)
+  #13 Nikola VLASIC [中场]
+  #16 Martin BATURINA [中场]
+  #17 Petar SUCIC [中场]
+  #11 Ante BUDIMIR [前锋]
+  #14 Ivan PERISIC [前锋]
+替补 (15人):
+  #12 Ivor PANDUR [门将]
+  #23 Dominik KOTARSKI [门将]
+  #4 Josko GVARDIOL [后卫]
+  #5 Duje CALETA-CAR [后卫]
+  #18 Kristijan JAKIC [后卫]
+  #22 Luka VUSKOVIC [后卫]
+  #25 Martin ERLIC [后卫]
+  #7 Nikola Moro [中场]
+  #15 Mario PASALIC [中场]
+  #19 Toni FRUK [中场]
+  #21 Luka SUCIC [中场]
+  #9 Andrej KRAMARIC [前锋]
+  #20 Igor MATANOVIC [前锋]
+  #24 Marco PASALIC [前锋]
+  #26 Petar Musa [前锋]
+
+【Ghana】 阵型: 4-1-2-3  |  主教练: Vitor PIMENTA
+首发11人:
+  #16 Benjamin ASARE [门将]
+  #4 Jonas ADJETEY [后卫]
+  #14 Gideon MENSAH [后卫]
+  #23 Derrick LUCKASSEN [后卫]
+  #26 Marvin SENAYA [后卫]
+  #5 Thomas PARTEY [中场]
+  #8 Kwasi SIBO [中场]
+  #11 Antoine SEMENYO [中场]
+  #15 Elisha OWUSU [中场]
+  #9 Jordan AYEW [前锋] (C)
+  #22 Kamaldeen SULEMANA [前锋]
+替补 (15人):
+  #1 Lawrence Ati ZIGI [门将]
+  #12 Joseph ANANG [门将]
+  #2 Alidu SEIDU [后卫]
+  #6 Abdul MUMIN [后卫]
+  #17 Baba RAHMAN [后卫]
+  #18 Jerome OPOKU [后卫]
+  #21 Kojo Peprah OPPONG [后卫]
+  #3 Caleb YIRENKYI [中场]
+  #20 Augustine BOAKYE [中场]
+  #7 Abdul FATAWU [前锋]
+  #10 Brandon THOMAS-ASANTE [前锋]
+  #13 Christopher Bonsu BAAH [前锋]
+  #19 Inaki WILLIAMS [前锋]
+  #24 Ernest NUAMAH [前锋]
+  #25 Prince ADU [前锋]
+
+---
+== 巴拿马 vs 英格兰 (Match #67) ==
+时间(UTC): 2026-06-27T21:00:00Z | Period=0
+
+【Panama】 阵型: 5-4-1  |  主教练: Javier SANCHEZ
+首发11人:
+  #22 Orlando MOSQUERA [门将]
+  #3 Jose CORDOBA [后卫]
+  #4 Fidel ESCOBAR [后卫]
+  #14 Carlos HARVEY [后卫]
+  #16 Andres ANDRADE [后卫]
+  #23 Amir MURILLO [后卫]
+  #26 Jorge GUTIERREZ [后卫]
+  #6 Cristian MARTINEZ [中场]
+  #7 Jose Luis RODRIGUEZ [中场]
+  #11 Edgar Yoel BARCENAS [中场] (C)
+  #9 Tomas RODRIGUEZ [前锋]
+替补 (15人):
+  #1 Luis MEJIA [门将]
+  #12 Cesar SAMUDIO [门将]
+  #2 Cesar BLACKMAN [后卫]
+  #5 Edgardo FARINA [后卫]
+  #13 Jiovany RAMOS [后卫]
+  #15 Eric DAVIS [后卫]
+  #25 Roderick MILLER [后卫]
+  #8 Adalberto CARRASQUILLA [中场]
+  #10 Ismael DIAZ [中场]
+  #19 Alberto QUINTERO [中场]
+  #20 Anibal GODOY [中场]
+  #21 Cesar YANIS [中场]
+  #17 Jose FAJARDO [前锋]
+  #18 Cecilio Waterman [前锋]
+  #24 Azarias LONDONO [前锋]
+
+【England】 阵型: 4-2-3-1  |  主教练: Justin COCHRANE
+首发11人:
+  #1 Jordan PICKFORD [门将]
+  #2 Ezri KONSA [后卫]
+  #3 Nico OREILLY [后卫]
+  #6 Marc GUEHI [后卫]
+  #26 Jarell QUANSAH [后卫]
+  #8 Elliot ANDERSON [中场]
+  #10 Jude BELLINGHAM [中场]
+  #17 Morgan ROGERS [中场]
+  #7 Bukayo SAKA [前锋]
+  #9 Harry KANE [前锋] (C)
+  #11 Marcus RASHFORD [前锋]
+替补 (14人):
+  #13 Dean Henderson [门将]
+  #23 James TRAFFORD [门将]
+  #5 John STONES [后卫]
+  #12 Trevoh CHALOBAH [后卫]
+  #15 Dan BURN [后卫]
+  #25 Djed SPENCE [后卫]
+  #4 Declan RICE [中场]
+  #14 Jordan HENDERSON [中场]
+  #16 Kobbie MAINOO [中场]
+  #21 Eberechi EZE [中场]
+  #18 Anthony GORDON [前锋]
+  #19 Ollie WATKINS [前锋]
+  #20 Noni MADUEKE [前锋]
+  #22 Ivan TONEY [前锋]
+
+---
