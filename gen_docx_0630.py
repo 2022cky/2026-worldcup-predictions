@@ -147,7 +147,7 @@ def write_match(match_data):
     sc(home_hdr, gs['home_name'], bold=True, size=Pt(9), color=DARK, align='left')
     row += 1
     for g in gs['home']:
-        add_data_row(t2, row, g, bg=GRAY if (row%2==0) else None)
+        add_data_row(t2, row, [''] + g, bg=GRAY if (row%2==0) else None)
         row += 1
 
     # Away team header — merged single cell spanning all 4 columns
@@ -156,7 +156,7 @@ def write_match(match_data):
     sc(away_hdr, gs['away_name'], bold=True, size=Pt(9), color=DARK, align='left')
     row += 1
     for g in gs['away']:
-        add_data_row(t2, row, g, bg=GRAY if (row%2==0) else None)
+        add_data_row(t2, row, [''] + g, bg=GRAY if (row%2==0) else None)
         row += 1
 
     add_text(gs.get('home_note', ''), Pt(8), color=RGBColor(0x66,0x66,0x66))
