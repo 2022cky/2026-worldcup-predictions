@@ -56,7 +56,7 @@ def set_cell(cell, text, bold=False, size=Pt(9), color=None, bg=None, align='cen
     if color:
         run.font.color.rgb = color
     if bg:
-        shading = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{str(bg)[2:]}"/>')
+        shading = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{str(bg)}"/>')
         cell._tc.get_or_add_tcPr().append(shading)
     # vertical centering
     tc = cell._tc

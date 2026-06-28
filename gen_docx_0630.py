@@ -5,7 +5,7 @@ from docx.shared import Inches, Pt, Cm, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.section import WD_ORIENT
-from docx.oxml.ns import qn
+from docx.oxml.ns import qn, nsdecls
 from docx.oxml import parse_xml
 import os
 
@@ -47,9 +47,13 @@ def sc(cell, text, bold=False, size=Pt(9), color=None, bg=None, align='center'):
     run._element.rPr.rFonts.set(qn('w:eastAsia'), '微软雅黑')
     if color: run.font.color.rgb = color
     if bg:
-        from docx.oxml.ns import nsdecls
-        shading = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{str(bg)[2:]}"/>')
+        shading = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{str(bg)}"/>')
         cell._tc.get_or_add_tcPr().append(shading)
+    # vertical center
+    tc = cell._tc
+    tcPr = tc.get_or_add_tcPr()
+    vAlign = parse_xml(f'<w:vAlign {nsdecls("w")} w:val="center"/>')
+    tcPr.append(vAlign)
 
 def add_header_row(table, row_idx, texts, size=Pt(9)):
     for i, t in enumerate(texts):
