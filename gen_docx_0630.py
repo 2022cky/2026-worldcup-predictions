@@ -141,21 +141,19 @@ def write_match(match_data):
     add_header_row(t2, 0, ['球队', '对手', '比分', '关键'])
 
     row = 1
-    # Home team header
-    sc(t2.cell(row, 0), gs['home_name'], bold=True, size=Pt(9), color=DARK)
-    sc(t2.cell(row, 1), '', size=Pt(9))
-    sc(t2.cell(row, 2), '', size=Pt(9))
-    sc(t2.cell(row, 3), '', size=Pt(9))
+    # Home team header — merged single cell spanning all 4 columns
+    home_hdr = t2.cell(row, 0)
+    home_hdr.merge(t2.cell(row, 3))
+    sc(home_hdr, gs['home_name'], bold=True, size=Pt(9), color=DARK, align='left')
     row += 1
     for g in gs['home']:
         add_data_row(t2, row, g, bg=GRAY if (row%2==0) else None)
         row += 1
 
-    # Away team header
-    sc(t2.cell(row, 0), gs['away_name'], bold=True, size=Pt(9), color=DARK)
-    sc(t2.cell(row, 1), '', size=Pt(9))
-    sc(t2.cell(row, 2), '', size=Pt(9))
-    sc(t2.cell(row, 3), '', size=Pt(9))
+    # Away team header — merged single cell spanning all 4 columns
+    away_hdr = t2.cell(row, 0)
+    away_hdr.merge(t2.cell(row, 3))
+    sc(away_hdr, gs['away_name'], bold=True, size=Pt(9), color=DARK, align='left')
     row += 1
     for g in gs['away']:
         add_data_row(t2, row, g, bg=GRAY if (row%2==0) else None)
