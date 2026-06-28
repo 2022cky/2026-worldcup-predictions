@@ -101,7 +101,7 @@ doc.add_paragraph()
 # SUMMARY TABLE
 # ═══════════════════════════════════════
 add_heading('预测汇总', Pt(12), DARK)
-t = doc.add_table(rows=5, cols=8)
+t = doc.add_table(rows=4, cols=8)
 t.style = 'Table Grid'
 t.alignment = WD_TABLE_ALIGNMENT.CENTER
 add_header_row(t, 0, ['#', '时间 (BJT)', '阶段', '比赛', '身价比', '首选比分', '半场', '冷门风险'])
@@ -135,7 +135,7 @@ def write_match(match_data):
     # Group stage table
     add_text('小组赛回顾', Pt(10), bold=True)
     gs = match_data['group_stage']
-    t2 = doc.add_table(rows=len(gs['home'])+len(gs['away'])+5, cols=4)
+    t2 = doc.add_table(rows=len(gs['home'])+len(gs['away'])+3, cols=4)
     t2.style = 'Table Grid'
     t2.alignment = WD_TABLE_ALIGNMENT.CENTER
     add_header_row(t2, 0, ['球队', '对手', '比分', '关键'])
@@ -176,7 +176,7 @@ def write_match(match_data):
         # If there's a table
         if isinstance(item_data, dict) and 'table' in item_data:
             tbl_data = item_data['table']
-            t3 = doc.add_table(rows=len(tbl_data)+1, cols=len(tbl_data[0]))
+            t3 = doc.add_table(rows=len(tbl_data), cols=len(tbl_data[0]))
             t3.style = 'Table Grid'
             t3.alignment = WD_TABLE_ALIGNMENT.CENTER
             add_header_row(t3, 0, tbl_data[0])
