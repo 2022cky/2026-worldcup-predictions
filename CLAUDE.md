@@ -1,6 +1,6 @@
 # 2026世界杯预测项目 - 项目规则
 
-> v15: +铁律7(复盘预测分开) — 禁止合写、禁止缩水、先声明再分步
+> v16: +铁律8(球员名单读API) — 禁止凭记忆写球员评分，必须先读ESPN roster验证名单
 
 ---
 
@@ -249,6 +249,7 @@ for evt in j.get('events', []):
 - 凭记忆写预测 → 必须对照Read的原始文件逐字复制
 - 写"无正式预测" → 必须先Glob确认真的没有
 - 觉得"大概是这样" → 不准"大概"
+- **凭记忆写球员评分 → 必须先读ESPN roster确认球员在名单中**
 - 🚨 **小组赛回顾表格禁止占位文字** → "胜""负""击败""战平"等占位词一律禁止。必须从 ESPN API / openfootball / 复盘文件 查证后填入**实际比分+进球者**。
   → 原因: 6/30预测日本vs突尼斯写"击败"而非"4-0"，荷兰vs瑞典/突尼斯同理。占位文字=信息缺失=后续分析建立在不准确数据上。
   → 自查命令: 写完小组赛回顾表格后，grep -n '[胜负击败战平]' 文件.md | grep -v '战胜\|胜者\|失败\|胜负手' — 查到的占位立即替换
@@ -256,6 +257,16 @@ for evt in j.get('events', []):
 ### 预测前
 
 ```
+[0] 🚨 球员名单API验证（硬性第一步 — 不准跳过）:
+    0a. 每场比赛: 读 ESPN summary roster — 确认首发+替补完整名单
+       url = f'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary?event={event_id}'
+       j['rosters'][0]['roster']  # 主队; j['rosters'][1]['roster']  # 客队
+       字段: starter=true/false, athlete.displayName, jersey
+    0b. 交叉验证: AnySearch 搜索 "[球队名] starting lineup confirmed" 确认首发无误
+    0c. 🚨 写球员评分前: 只写 roster 中 starter=true 的球员；替补写 [可替补]
+    0d. 🚨 禁止凭记忆: 不在名单的球员不得出现、不得评分、不得讨论其战术作用
+    → 案例(6/30): 原预测给三笘薰7.8/远藤航7.6/守田英正7.0评分，三人均不在日本26人名单
+    → 案例(6/27): 预测内马尔首发但实际他在替补席 → 同样因未读roster
 [1] ESPN API 确认当天赛程（UTC+8换算北京日期）
 [2] AnySearch 获取小组形势/伤病/场外新闻
 [3] 每场比赛必须出现在[1]的返回中
