@@ -13,5 +13,10 @@ data/openfootball/
 .playwright-cli/
 cctv_match.png
 ~
+~$*
 node_modules/
 package-lock.json
+
+# 临时脚本和输出
+_tmp_*.py
+_*_out.txt
