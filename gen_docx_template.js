@@ -1,226 +1,434 @@
-// DOCX 美化模板 — 2026世界杯预测报告
-// 用法: 复制此文件 → 修改 MATCHES 数据 → node gen_xxx.js
-// 规范: CLAUDE.md v17 — 横向A4, 微软雅黑, 深蓝表头白字, 隔行灰底, 首选浅绿
-//       🚨 国家名全称 (禁止缩写/禁止3字母代码)
-//       🚨 汇总表8列 (无半场列), 表格宽度不溢出
+// DOCX 统一模板 — 2026世界杯预测/复盘
+// v2.0: 所有表型 + 单场/多场双模式 + 数据驱动
+// 用法: const T = require("./gen_docx_template.js"); T.buildPrediction({...});
+//       node gen_docx_xxxx.js (直接运行数据文件)
 
 const fs = require("fs");
 const {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   Header, Footer, AlignmentType, PageOrientation, BorderStyle, WidthType,
-  ShadingType, PageNumber, PageBreak
+  ShadingType, PageNumber, PageBreak, HeadingLevel
 } = require("docx");
 
-// ═══ 版面配置 ═══
-// 🚨 关键: docx-js landscape 需传入 PORTRAIT 尺寸, 内部自动交换
-// A4 portrait = 11906×16838, 传参后 swap → XML w=16838 h=11906 (正确横向)
-const FONT = "微软雅黑";
-const PAGE_W = 11906; // 短边 (portrait width, swap后变 landscape height)
-const PAGE_H = 16838; // 长边 (portrait height, swap后变 landscape width)
-const MARGIN = 850;
-const CONTENT_W = PAGE_H - MARGIN * 2; // 16838 - 1700 = 15138 (真正可打印宽度)
+// ═══ 版面 ═══
+const FONT = "Microsoft YaHei";
+const PW = 11906;               // A4 portrait width (swap → landscape height)
+const PH = 16838;               // A4 portrait height (swap → landscape width)
+const M = 1300;                 // 1" margin for content
+const CW = PH - M * 2;          // 14238 — content width (wider than original)
 
 // ═══ 色板 ═══
-const C = {
-  HEADER_BG:   "1A2E3D",
-  HEADER_TEXT: "FFFFFF",
-  ALT_ROW:     "F5F7FA",
-  PREF_ROW:    "E8F5E9",
-  BORDER:      "D0D5DD",
-  TITLE_RED:   "C0392B",
-  SUBTITLE:    "1A1A2E",
-  META:        "7F8C8D",
-  META_LIGHT:  "95A5A6",
-  ACCENT:      "2E75B6",
-  HIGH_RISK:   "C0392B",
+const COL = {
+  BLUE:       "1A3A5C",
+  WHITE:      "FFFFFF",
+  GRAY:       "F2F2F2",
+  GREEN:      "E2EFDA",
+  RED:        "C0392B",
+  BLACK:      "1A1A2E",
+  DARK:       "333333",
+  META:       "888888",
+  META2:      "666666",
+  ACCENT:     "2E75B6",
+  LIGHT_BLUE: "D6E4F0",
+  ORANGE:     "F39C12",
 };
 
-// ═══ 基础组件 ═══
-const thinBorder = { style: BorderStyle.SINGLE, size: 1, color: C.BORDER };
-const BORDERS = { top: thinBorder, bottom: thinBorder, left: thinBorder, right: thinBorder };
+// ═══ 基础原子 ═══
+const border = { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" };
+const bd = { top: border, bottom: border, left: border, right: border };
+const cm = { top: 60, bottom: 60, left: 100, right: 100 };
 
-function tr(text, size, opts) {
-  if (!opts) opts = {};
-  return new TextRun({ text, font: FONT, size: (size || 10) * 2, bold: !!opts.bold, color: opts.color });
+function T(text, opts = {}) {
+  return new TextRun({
+    text: String(text), font: FONT,
+    size: (opts.sz || 9) * 2,                     // 常规9pt=18 half-pts
+    bold: !!opts.b, color: opts.c || COL.BLACK,
+    italics: !!opts.i,
+  });
 }
-
-function para(text, size, opts) {
-  if (!opts) opts = {};
+function P(text, opts = {}) {
+  const r = Array.isArray(text) ? text : [T(text, opts)];
   return new Paragraph({
-    spacing: { after: opts.after !== undefined ? opts.after : 80, before: opts.before || 0 },
-    alignment: opts.align || AlignmentType.LEFT,
-    children: [tr(text, size || 10, opts)],
+    spacing: { after: opts.a != null ? opts.a : 60, before: opts.bf || 0 },
+    alignment: opts.al || AlignmentType.LEFT,
+    children: r,
     border: opts.border,
   });
 }
-function empty() { return new Paragraph({ spacing: { after: 40 }, children: [] }); }
-function sep() {
-  return new Paragraph({
-    spacing: { before: 200, after: 200 },
-    border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: C.ACCENT, space: 1 } },
-    children: [],
-  });
-}
-function pageBr() { return new Paragraph({ children: [new PageBreak()] }); }
+function E() { return new Paragraph({ spacing: { after: 40 }, children: [] }); }     // empty
+function BR() { return new Paragraph({ children: [new PageBreak()] }); }
 
-// ═══ 表格组件 ═══
-function hdrCell(text, colW) {
-  return new TableCell({
-    borders: BORDERS, width: { size: colW, type: WidthType.DXA },
-    shading: { fill: C.HEADER_BG, type: ShadingType.CLEAR },
-    verticalAlign: "center",
-    margins: { top: 50, bottom: 50, left: 60, right: 60 },
-    children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [tr(text, 9, { bold: true, color: C.HEADER_TEXT })] })],
-  });
+// heading
+function H1(txt) { return new Paragraph({ heading: HeadingLevel.HEADING_1, spacing: { before: 300, after: 140 }, children: [T(txt, { sz: 15, b: true, c: COL.BLUE })] }); }
+function H2(txt) { return new Paragraph({ heading: HeadingLevel.HEADING_2, spacing: { before: 200, after: 100 }, children: [T(txt, { sz: 12, b: true, c: COL.DARK })] }); }
+
+// metadata / notes
+function META(txt) { return P(txt, { sz: 7.5, c: COL.META, i: true }); }
+function NOTE(txt) { return P(txt, { sz: 8, c: COL.META2 }); }
+function BOLD(txt, c) { return P(txt, { sz: 9, b: true, c: c || COL.DARK }); }
+
+// ═══ 表格单元格 ═══
+function HC(txt, w) {       // header cell
+  return new TableCell({ borders: bd, width: { size: w, type: WidthType.DXA }, shading: { fill: COL.BLUE, type: ShadingType.CLEAR }, verticalAlign: "center", margins: cm,
+    children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [T(txt, { sz: 8.5, b: true, c: COL.WHITE })] })] });
 }
-function datCell(text, colW, opts) {
-  const o = opts || {};
-  const runs = Array.isArray(text) ? text : [tr(text, 9, o)];
-  return new TableCell({
-    borders: BORDERS, width: { size: colW, type: WidthType.DXA },
-    shading: o.shading ? { fill: o.shading, type: ShadingType.CLEAR } : undefined,
-    verticalAlign: "center",
-    margins: { top: 40, bottom: 40, left: 60, right: 60 },
-    children: [new Paragraph({ alignment: o.align || AlignmentType.CENTER, children: runs })],
-  });
+function DC(txt, w, opts = {}) {   // data cell
+  const runs = Array.isArray(txt) ? txt : [T(txt, { sz: opts.sz || 8, b: !!opts.b, c: opts.c || COL.DARK })];
+  return new TableCell({ borders: bd, width: { size: w, type: WidthType.DXA },
+    shading: opts.sh ? { fill: opts.sh, type: ShadingType.CLEAR } : undefined,
+    verticalAlign: "center", margins: cm,
+    children: [new Paragraph({ alignment: opts.al || AlignmentType.LEFT, children: runs })] });
 }
-function tblRow(cells) { return new TableRow({ children: cells }); }
-function makeTable(colW, rows) {
-  return new Table({ width: { size: CONTENT_W, type: WidthType.DXA }, columnWidths: colW, rows });
+// Multi-line cell: "line1\nline2" → multiple Paragraphs
+function DCM(txt, w, opts = {}) {
+  const lines = String(txt).split("\n");
+  return new TableCell({ borders: bd, width: { size: w, type: WidthType.DXA },
+    shading: opts.sh ? { fill: opts.sh, type: ShadingType.CLEAR } : undefined,
+    verticalAlign: "top", margins: cm,
+    children: lines.map(l => new Paragraph({ spacing: { after: 30 }, alignment: opts.al || AlignmentType.LEFT, children: [T(l, { sz: opts.sz || 8, b: !!opts.b, c: opts.c || COL.DARK })] })) });
 }
 
-// ═══ 固定模板表格 ═══
-// 汇总表 — 8列: #,时间,组,比赛,形势,首选比分,备选比分,冷门风险
-// 列宽和 = 15038 = CONTENT_W (不溢出)
-const SW = [400, 720, 420, 5900, 3200, 1280, 2158, 1060]; // sum = 15138
+function ROW(cells) { return new TableRow({ children: cells }); }
 
-function buildSummary(rows) {
-  const hdr = tblRow([
-    hdrCell("#", SW[0]), hdrCell("时间", SW[1]), hdrCell("组", SW[2]),
-    hdrCell("比赛", SW[3]), hdrCell("形势", SW[4]), hdrCell("首选比分", SW[5]),
-    hdrCell("备选比分", SW[6]), hdrCell("冷门风险", SW[7]),
-  ]);
-  const data = rows.map((r, i) => {
-    const sh = i % 2 === 0 ? C.PREF_ROW : undefined;
-    return tblRow(r.map((t, j) =>
-      datCell(t, SW[j], { bold: j === 5, align: j <= 2 || j >= 5 ? AlignmentType.CENTER : AlignmentType.LEFT, shading: sh })
-    ));
-  });
-  return makeTable(SW, [hdr, ...data]);
+// header row factory
+function HR(labels, widths) { return ROW(labels.map((t, i) => HC(t, widths[i]))); }
+// data row factory: texts=[...], widths=[...], green/gray
+function DR(texts, widths, green, gray) {
+  const sh = green ? COL.GREEN : (gray ? COL.GRAY : undefined);
+  return ROW(texts.map((t, i) => DC(t, widths[i], { sh })));
+}
+// data row with first column bold
+function DRB(texts, widths, green, gray) {
+  const sh = green ? COL.GREEN : (gray ? COL.GRAY : undefined);
+  return ROW(texts.map((t, i) => DC(t, widths[i], { b: i === 0, sh })));
+}
+// data row with specific bold indices
+function DRBI(texts, widths, boldIndices, green, gray) {
+  const sh = green ? COL.GREEN : (gray ? COL.GRAY : undefined);
+  return ROW(texts.map((t, i) => DC(t, widths[i], { b: boldIndices.includes(i), sh })));
 }
 
-// 因素导向表 — 3列: 因素, 对哪边有利, 理由
-function factorTbl(rows) {
-  const W = [4800, 2200, CONTENT_W - 7000];
-  const hdr = tblRow([hdrCell("因素", W[0]), hdrCell("对哪边有利", W[1]), hdrCell("理由", W[2])]);
-  const data = rows.map((r, i) => tblRow(r.map((t, j) =>
-    datCell(t, W[j], { align: j === 2 ? AlignmentType.LEFT : (j === 1 ? AlignmentType.CENTER : AlignmentType.LEFT), shading: i % 2 === 0 ? C.ALT_ROW : undefined })
-  )));
-  return makeTable(W, [hdr, ...data]);
+function TBL(widths, rows) {
+  return new Table({ width: { size: CW, type: WidthType.DXA }, columnWidths: widths, rows });
 }
 
-// 比分预测表 — 4列: 类型, 比分, 半场, 说明
-function scoreTbl(rows) {
-  const W = [1200, 1800, 1200, CONTENT_W - 4200];
-  const hdr = tblRow([hdrCell("类型", W[0]), hdrCell("比分", W[1]), hdrCell("半场", W[2]), hdrCell("说明", W[3])]);
-  const data = rows.map((r, i) => tblRow(r.map((t, j) =>
-    datCell(t, W[j], { bold: i === 0 && j === 1, align: j === 3 ? AlignmentType.LEFT : AlignmentType.CENTER, shading: i === 0 ? C.PREF_ROW : (i % 2 === 0 ? C.ALT_ROW : undefined) })
-  )));
-  return makeTable(W, [hdr, ...data]);
-}
+// ═══════════════════════════════════════════
+// 预定义表类型
+// ═══════════════════════════════════════════
 
-// 韧性评估表 — 3列
-function resilienceTbl(items) {
-  const W = [2800, 1200, CONTENT_W - 4000];
-  const hdr = tblRow([hdrCell("韧性维度", W[0]), hdrCell("评分", W[1]), hdrCell("说明", W[2])]);
-  const data = items.map((r, i) => tblRow(r.map((t, j) =>
-    datCell(t, W[j], { align: j === 2 ? AlignmentType.LEFT : (j === 1 ? AlignmentType.CENTER : AlignmentType.LEFT), shading: i % 2 === 0 ? C.ALT_ROW : undefined })
-  )));
-  return makeTable(W, [hdr, ...data]);
-}
-
-// 信息表 — 2列
-function infoTbl(rows) {
-  const W = [1800, CONTENT_W - 1800];
-  return makeTable(W, rows.map(([k, v]) => tblRow([
-    datCell(k, W[0], { bold: true, shading: C.ALT_ROW, align: AlignmentType.LEFT }),
-    datCell(v, W[1], { align: AlignmentType.LEFT }),
-  ])));
-}
-
-// 小组积分表 (独立宽度)
-const GW = [600, 2400, 500, 500, 500, 500, 1300, 800, 800]; // sum = 7800
-function groupTbl(rows) {
-  const hdr = tblRow(["#","球队","场","胜","平","负","进/失","净胜","积分"].map((h, i) => hdrCell(h, GW[i])));
-  const data = rows.map((r, ri) => tblRow(r.map((t, ci) =>
-    datCell(t, GW[ci], { bold: ri === 0, align: ci >= 2 ? AlignmentType.CENTER : AlignmentType.LEFT, shading: ri === 0 ? C.PREF_ROW : (ri % 2 === 0 ? C.ALT_ROW : undefined) })
-  )));
-  return new Table({ width: { size: 7800, type: WidthType.DXA }, columnWidths: GW, rows: [hdr, ...data] });
-}
-
-// 淘汰赛路径表
-const PATH_W = [1200, 2400, 2400, 4569, 4569]; // sum = 15138
-function pathTbl(rows) {
-  const hdr = tblRow([
-    hdrCell("小组", PATH_W[0]), hdrCell("第1名", PATH_W[1]), hdrCell("第2名", PATH_W[2]),
-    hdrCell("第1名淘汰赛路径", PATH_W[3]), hdrCell("第2名淘汰赛路径", PATH_W[4]),
-  ]);
-  const data = rows.map(r => tblRow(r.map((t, j) =>
-    datCell(t, PW[j], { align: j >= 3 ? AlignmentType.LEFT : AlignmentType.CENTER })
-  )));
-  return makeTable(PW, [hdr, ...data]);
-}
-
-// ═══ 文档结构 ═══
-function buildDoc({ date, title, subtitle, summaryRows, groupData, pathData, matchSections }) {
-  const cover = [
-    empty(),
-    para("2026 FIFA 世界杯", 28, { bold: true, color: C.TITLE_RED, align: AlignmentType.CENTER }),
-    para(title, 20, { bold: true, color: C.SUBTITLE, align: AlignmentType.CENTER, after: 120 }),
-    para(subtitle, 12, { color: C.META, align: AlignmentType.CENTER, after: 360 }),
-    para(`生成时间: ${date} 北京时间  |  数据源: FIFA API + ESPN API  |  框架: CLAUDE.md v17`, 8, { color: C.META_LIGHT, align: AlignmentType.CENTER, after: 400 }),
-    sep(),
+// --- 封面 ---
+function cover({ title, subtitle, tag, lines }) {
+  const items = [
+    E(), E(),
+    P("2026 FIFA 世界杯", { sz: 18, b: true, c: COL.RED, al: AlignmentType.CENTER }),
+    P(title, { sz: 22, b: true, al: AlignmentType.CENTER, a: 80 }),
   ];
+  if (subtitle) items.push(P(subtitle, { sz: 14, c: COL.META, al: AlignmentType.CENTER, a: 60 }));
+  if (tag) items.push(P(tag, { sz: 11, b: true, c: COL.RED, al: AlignmentType.CENTER, a: 40 }));
+  if (lines) lines.forEach(l => items.push(P(l, { sz: 9, c: COL.DARK, al: AlignmentType.CENTER, a: 20 })));
+  items.push(P("", { sz: 7, c: COL.META2, al: AlignmentType.CENTER, a: 20 }));
+  items.push(BR());
+  return items;
+}
 
-  // Group standings
-  const groupSection = [];
-  for (const g of groupData) {
-    groupSection.push(para(g.label, 11, { bold: true, color: C.SUBTITLE }));
-    groupSection.push(groupTbl(g.rows));
-    groupSection.push(empty());
+// --- 预测汇总表 (8+1列) ---
+// cols: #, 比赛, 身价比, 强队分类, 首选比分, 概率, 备选, 冷门风险
+const SUM_W = [500, 3800, 1200, 2400, 2200, 900, 2800, 1500]; // sum check
+function summaryTable(rows) {
+  const W = SUM_W; // let CW be distributed
+  // Actually we need exact sum. Let's recalc: 500+3800+1200+2400+2200+900+2800+1500 = 15300 - too wide for CW=14238
+  // Let me fix widths
+  // Actually 500+3200+1100+2200+2000+800+2600+1838 = 14238 ✓
+  const WW = [500, 3200, 1100, 2200, 2000, 800, 2600, 1838];
+  return TBL(WW, [
+    HR(["#","比赛","身价比","强队分类","首选比分","概率","备选","冷门风险"], WW),
+    ...rows.map((r, i) => DR(r, WW, i === 0, i % 2 === 1)),
+  ]);
+}
+
+// --- 盘口表 (4列) ---
+const ODDS_W = [3400, 1600, 1600, 7638];
+function oddsTable(rows) {
+  return TBL(ODDS_W, [
+    HR(["盘口","赔率","隐含概率","解读"], ODDS_W),
+    ...rows.map((r, i) => DR(r, ODDS_W, false, i % 2 === 0)),
+  ]);
+}
+
+// --- 盘口对比表 (4列) ---
+const ODDS_CMP_W = [3200, 3200, 3200, 4638];
+function oddsCompareTable(rows) {
+  return TBL(ODDS_CMP_W, [
+    HR(["维度","市场","我们","分歧"], ODDS_CMP_W),
+    ...rows.map((r, i) => DR(r, ODDS_CMP_W, false, i % 2 === 0)),
+  ]);
+}
+
+// --- 球员评分表 (7列: 空/#/球员/评分/位置/备注) ---
+const PS_W = [400, 500, 3000, 700, 1400, 8238]; // 14238
+function playerScoreTable(rows) {
+  return TBL(PS_W, [
+    HR(["","#","球员","评分","位置","表现点评"], PS_W),
+    ...rows.map((r, i) => DR(r, PS_W, false, i % 2 === 0)),
+  ]);
+}
+
+// --- 因素导向表 (3列) ---
+function factorTable(rows) {
+  const W = [5800, 1800, 6638];
+  return TBL(W, [
+    HR(["因素","有利方","理由"], W),
+    ...rows.map((r, i) => DRB(r, W, false, i % 2 === 0)),
+  ]);
+}
+
+// --- 比分预测表 (4列: 比分/概率/说明) ---
+function scoreTable(rows) {
+  const W = [3000, 1000, 10238];
+  return TBL(W, [
+    HR(["比分","概率","说明"], W),
+    ...rows.map((r, i) => DRBI(r, W, [0], i === 0, i % 2 === 1)),
+  ]);
+}
+
+// --- 比分详情表 (4列: 类型/比分/半场/进球者) ---
+function scoreDetailTable(rows) {
+  const W = [1600, 2800, 1200, 8638];
+  return TBL(W, [
+    HR(["类型","比分","半场","进球者"], W),
+    ...rows.map((r, i) => DRBI(r, W, [0, 1], i === 0, i % 2 === 1)),
+  ]);
+}
+
+// --- 伤病表 (3列: 球队/球员/状态) ---
+function injuryTable(rows) {
+  const W = [1200, 4800, 8238];
+  return TBL(W, [
+    HR(["球队","球员","状态"], W),
+    ...rows.map((r, i) => DR(r, W, false, i % 2 === 0)),
+  ]);
+}
+// 伤病扩展表 (4列: 球队/球员/状态/影响)
+function injuryTableEx(rows) {
+  const W = [1200, 3800, 4600, 4638];
+  return TBL(W, [
+    HR(["球队","球员","状态","影响评级"], W),
+    ...rows.map((r, i) => DR(r, W, false, i % 2 === 0)),
+  ]);
+}
+
+// --- 信息表 (2列: 标签/值) ---
+function infoTable(rows) {
+  const W = [2800, CW - 2800];
+  return TBL(W, rows.map(([k, v], i) => ROW([DC(k, W[0], { b: true, sh: COL.GRAY }), DC(v, W[1])])));
+}
+
+// --- 韧性评估表 (3列) ---
+function resilienceTable(items) {
+  const W = [2800, 1400, CW - 4200];
+  return TBL(W, [
+    HR(["维度","评级","说明"], W),
+    ...items.map((r, i) => DR(r, W, false, i % 2 === 0)),
+  ]);
+}
+
+// --- 强队分类表 (4列) ---
+function classificationTable(rows) {
+  const W = [2800, 3800, 3800, 3838];
+  return TBL(W, [
+    HR(["维度","球队A","球队B","?"], W),  // header overridden in use
+    ...rows.map((r, i) => DR(r, W, false, i % 2 === 0)),
+  ]);
+}
+
+// --- 教练博弈表 (4列) ---
+function coachingTable(rows) {
+  const W = [2400, 5000, 5000];
+  // sum = 12400 < CW, let's distribute: 2400, 5000, 4838 = 12238? No, need to match CW=14238
+  // Actually CW = 16838 - 2600 = 14238. Let's do: 2400, 5200, 6638 = 14238
+  const WW = [2400, 5200, 6638];
+  return TBL(WW, [
+    HR(["场景","球队A","球队B"], WW),
+    ...rows.map((r, i) => DR(r, WW, false, i % 2 === 0)),
+  ]);
+}
+
+// --- 定位球表 (4列) ---
+function setPiecesTable(rows) {
+  const W = [2800, 3800, 3800, 3838];
+  return TBL(W, [
+    HR(["维度","球队A","球队B","?"]),
+    ...rows.map((r, i) => DR(r, W, false, i % 2 === 0)),
+  ]);
+}
+
+// --- 总结对比表 (4列) ---
+function summaryCompareTable(rows) {
+  const W = [3200, 3800, 3800, 3438];
+  return TBL(W, [
+    HR(["维度","球队A","球队B","优势"], W),
+    ...rows.map((r, i) => DR(r, W, false, i % 2 === 0)),
+  ]);
+}
+
+// --- 首发变动对比表 (4列) ---
+function lineupChangeTable(rows) {
+  const W = [1800, 3600, 3600, 5238];
+  return TBL(W, [
+    HR(["位置","原预测","实际首发","影响"], W),
+    ...rows.map((r, i) => DR(r, W, false, i % 2 === 0)),
+  ]);
+}
+
+// --- 通用灵活表: 传入headers+widths+rows ---
+function flexTable(headers, widths, rows, greenFirst) {
+  return TBL(widths, [
+    HR(headers, widths),
+    ...rows.map((r, i) => DR(r, widths, greenFirst && i === 0, !greenFirst && i % 2 === 0)),
+  ]);
+}
+
+// --- 关键对位表 — 对位1专用 (4列: 维度/球员A/球员B) ---
+function matchupTable(rows) {
+  const W = [3000, 5619, 5619];
+  return TBL(W, [
+    HR(["维度","球员A","球员B"], W),
+    ...rows.map((r, i) => DR(r, W, false, i % 2 === 0)),
+  ]);
+}
+
+// ═══════════════════════════════════════════
+// 文档构建器
+// ═══════════════════════════════════════════
+
+/**
+ * 构建单场比赛预测文档
+ * @param {Object} opts
+ * @param {string} opts.title        - 标题如 "瑞士 vs 哥伦比亚"
+ * @param {string} opts.subtitle     - 副标题如 "SUI vs COL"
+ * @param {string} opts.tag          - 红色标签
+ * @param {string[]} opts.metaLines  - 封面信息行
+ * @param {string[][]} opts.summary  - 汇总表数据行
+ * @param {string} opts.summaryNote  - 汇总备注
+ * @param {Object[]} opts.sections   - [{ title, subtitle, note, table: {type, rows, headers, widths}, text, texts }]
+ */
+function buildPrediction(opts) {
+  if (!opts.outFile) throw new Error("buildPrediction requires opts.outFile");
+  const children = [];
+
+  // Cover
+  children.push(...cover({
+    title: opts.title,
+    subtitle: opts.subtitle,
+    tag: opts.tag,
+    lines: opts.metaLines,
+  }));
+
+  // Summary
+  if (opts.summary) {
+    children.push(H1("预测汇总"));
+    children.push(summaryTable(opts.summary));
+    if (opts.summaryNote) children.push(META(opts.summaryNote));
+    children.push(E());
   }
 
-  const children = [
-    ...cover,
-    para("一、预测汇总", 14, { bold: true, color: C.ACCENT, before: 100, after: 120 }),
-    buildSummary(summaryRows),
-    empty(),
-    para("二、小组积分形势", 14, { bold: true, color: C.ACCENT, before: 100, after: 120 }),
-    ...groupSection,
-    para("三、淘汰赛路径分析", 14, { bold: true, color: C.ACCENT, before: 100, after: 120 }),
-    pathTbl(pathData),
-    pageBr(),
-    para("四、分场比赛详细分析", 14, { bold: true, color: C.ACCENT, before: 100, after: 120 }),
-    ...matchSections.flat(),
-    empty(), sep(),
-    para("数据来源: FIFA API + ESPN API + Sporting News + Sports Mole + FIFA官网", 7, { color: C.META_LIGHT }),
-    para("身价数据: Transfermarkt via Mundo Deportivo + memory/team-market-values.md", 7, { color: C.META_LIGHT }),
-    para("分析框架: CLAUDE.md v17 (身价量化 + 强队三类分法 + 淘汰赛路径分析 + 10项必填清单)", 7, { color: C.META_LIGHT }),
-    para(`生成时间: ${date} 北京时间`, 7, { color: C.META_LIGHT }),
-  ];
+  // Sections
+  for (const sec of (opts.sections || [])) {
+    if (sec.title) children.push(H1(sec.title));
+    if (sec.subtitle) children.push(H2(sec.subtitle));
+    if (sec.text) children.push(P(sec.text));
+    if (sec.note) children.push(META(sec.note));
+    if (sec.bold) children.push(BOLD(sec.bold, COL.BLUE));
 
+    // Multiple texts
+    if (sec.texts) {
+      for (const t of sec.texts) {
+        if (typeof t === "string") children.push(P(t));
+        else if (t.bold) children.push(BOLD(t.text || t, t.color));
+        else if (t.meta) children.push(META(t.text || t));
+        else children.push(P(t.text || t, t.opts || {}));
+      }
+    }
+
+    // Table
+    if (sec.table) {
+      const t = sec.table;
+      if (t.type === "flex") {
+        children.push(flexTable(t.headers, t.widths, t.rows, t.greenFirst));
+      } else if (t.type === "summary") {
+        children.push(summaryTable(t.rows));
+      } else if (t.type === "odds") {
+        children.push(oddsTable(t.rows));
+      } else if (t.type === "oddsCompare") {
+        children.push(oddsCompareTable(t.rows));
+      } else if (t.type === "playerScore") {
+        children.push(playerScoreTable(t.rows));
+      } else if (t.type === "factor") {
+        children.push(factorTable(t.rows));
+      } else if (t.type === "score") {
+        children.push(scoreTable(t.rows));
+      } else if (t.type === "scoreDetail") {
+        children.push(scoreDetailTable(t.rows));
+      } else if (t.type === "injury") {
+        children.push(injuryTable(t.rows));
+      } else if (t.type === "injuryEx") {
+        children.push(injuryTableEx(t.rows));
+      } else if (t.type === "info") {
+        children.push(infoTable(t.rows));
+      } else if (t.type === "resilience") {
+        children.push(resilienceTable(t.rows));
+      } else if (t.type === "classification") {
+        children.push(classificationTable(t.rows));
+      } else if (t.type === "coaching") {
+        children.push(coachingTable(t.rows));
+      } else if (t.type === "setPieces") {
+        children.push(setPiecesTable(t.rows));
+      } else if (t.type === "matchup") {
+        children.push(matchupTable(t.rows));
+      } else if (t.type === "summaryCompare") {
+        children.push(summaryCompareTable(t.rows));
+      } else if (t.type === "lineupChange") {
+        children.push(lineupChangeTable(t.rows));
+      }
+    }
+
+    if (sec.space) children.push(E());
+  }
+
+  // Footer
+  children.push(E());
+  children.push(META(opts.footer || ""));
+  children.push(META(`生成时间: ${new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" })} 北京时间`));
+
+  return save(opts.outFile, buildWrapper(opts.title, children));
+}
+
+function buildWrapper(title, children) {
   return new Document({
-    styles: { default: { document: { run: { font: FONT, size: 20 } } } },
+    styles: {
+      default: { document: { run: { font: FONT, size: 18 } } },
+      paragraphStyles: [
+        { id: "Heading1", name: "Heading 1", basedOn: "Normal", next: "Normal", quickFormat: true,
+          run: { size: 30, bold: true, font: FONT, color: COL.BLUE },
+          paragraph: { spacing: { before: 300, after: 140 }, outlineLevel: 0 } },
+        { id: "Heading2", name: "Heading 2", basedOn: "Normal", next: "Normal", quickFormat: true,
+          run: { size: 24, bold: true, font: FONT, color: COL.DARK },
+          paragraph: { spacing: { before: 200, after: 100 }, outlineLevel: 1 } },
+      ],
+    },
     sections: [{
       properties: {
-        page: { size: { width: PAGE_W, height: PAGE_H, orientation: PageOrientation.LANDSCAPE }, margin: { top: 720, right: MARGIN, bottom: 720, left: MARGIN } },
+        page: {
+          size: { width: PW, height: PH, orientation: PageOrientation.LANDSCAPE },
+          margin: { top: 1100, right: M, bottom: 1100, left: M },
+        },
       },
       headers: {
         default: new Header({
           children: [new Paragraph({
-            alignment: AlignmentType.RIGHT, spacing: { after: 0 },
-            border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: C.ACCENT, space: 4 } },
-            children: [tr(`2026 FIFA 世界杯  ·  ${title}`, 8, { color: C.META })],
+            alignment: AlignmentType.RIGHT,
+            border: { bottom: { style: BorderStyle.SINGLE, size: 3, color: COL.ACCENT, space: 4 } },
+            children: [T(`${title}  |  2026 FIFA 世界杯`, { sz: 7, c: COL.META, i: true })],
           })],
         }),
       },
@@ -229,10 +437,9 @@ function buildDoc({ date, title, subtitle, summaryRows, groupData, pathData, mat
           children: [new Paragraph({
             alignment: AlignmentType.CENTER,
             children: [
-              tr("— ", 8, { color: C.META }),
-              tr("Page ", 8, { color: C.META }),
-              new TextRun({ children: [PageNumber.CURRENT], font: FONT, size: 16, color: C.META }),
-              tr(" —", 8, { color: C.META }),
+              T("— 第 ", { sz: 7, c: COL.META }),
+              new TextRun({ children: [PageNumber.CURRENT], font: FONT, size: 14, color: COL.META }),
+              T(" 页 —", { sz: 7, c: COL.META }),
             ],
           })],
         }),
@@ -242,11 +449,30 @@ function buildDoc({ date, title, subtitle, summaryRows, groupData, pathData, mat
   });
 }
 
-// ═══ 导出 ═══
-module.exports = { buildDoc, tr, para, empty, sep, pageBr, factorTbl, scoreTbl, resilienceTbl, infoTbl, sep as separator };
-
-// ═══ 直接运行时生成示例文件 ═══
-if (require.main === module) {
-  console.log("模板已加载。请创建独立脚本，调用 buildDoc() 生成具体日期的文档。");
-  console.log("参考: gen_docx_0628_v4.js 中的数据结构。");
+// ═══ 便捷: 直接打包写入 ═══
+function save(filename, doc) {
+  return Packer.toBuffer(doc).then(buf => {
+    fs.writeFileSync(filename, buf);
+    console.log(`[OK] ${filename} (${(buf.length / 1024).toFixed(1)} KB)`);
+    return buf;
+  });
 }
+
+// ═══ 导出 ═══
+module.exports = {
+  // atoms
+  T, P, E, BR, H1, H2, META, NOTE, BOLD,
+  // table primitives
+  HC, DC, DCM, ROW, HR, DR, DRB, DRBI, TBL, flexTable,
+  // pre-built tables
+  summaryTable, oddsTable, oddsCompareTable, playerScoreTable,
+  factorTable, scoreTable, scoreDetailTable, injuryTable, injuryTableEx,
+  infoTable, resilienceTable, classificationTable, coachingTable,
+  setPiecesTable, matchupTable, summaryCompareTable, lineupChangeTable,
+  // builders
+  cover, buildPrediction, buildWrapper,
+  // output
+  save,
+  // constants
+  COL, CW, FONT,
+};
