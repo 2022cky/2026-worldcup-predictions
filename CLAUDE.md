@@ -1,6 +1,6 @@
 # 2026世界杯预测项目 - 项目规则
 
-> v19: +铁律15(淘汰赛1-0必须列为选项)+铁律16(关键防守球员伤退风险建模) — 7/7葡萄牙0-1西班牙复盘
+> v21: +必填清单增至12项(小组回顾表格+盘口分析) + DOCX输出8条质量规则 —— 7月8日预测多次修改复盘
 
 ---
 
@@ -62,7 +62,7 @@ for evt in j.get('events', []):
 
 ### 文件命名
 - `.md`: `YYYY年M月D日_主题.md`
-- `.docx`: `YYYY年M月D日_主题.docx`（通过 `gen_docx.py` 生成，格式美观）
+- `.docx`: `YYYY年M月D日_主题.docx`（通过 `docx` skill 生成，格式美观）
 
 ---
 
@@ -76,7 +76,7 @@ for evt in j.get('events', []):
 
 ### .docx 排版（正式报告）
 
-> 通过 `python gen_docx.py` 生成。脚本读预测数据 → 输出横向A4文档。
+> 通过 `docx` skill 生成（内部使用 docx-js）。脚本读预测数据 → 输出横向A4文档。
 
 | 规范 | 说明 |
 |------|------|
@@ -86,6 +86,19 @@ for evt in j.get('events', []):
 | **国旗** | ❌ 禁止 emoji 国旗（Windows Word 显示为方块）→ 用 **三位国家缩写** 替代（如 FRA / ESP / ARG） |
 | **符号** | ❌ 禁止 emoji（✅❌⚠️等）→ 用文字标注（[对]/[错]/[待]） |
 | **结构** | 封面→预测汇总→小组积分→淘汰赛路径→6场详情→数据源脚注 |
+
+**🚨 DOCX 生成强制规则（防止多次返工）:**
+
+| # | 规则 | 错误示例 | 正确示例 |
+|:---:|------|------|------|
+| 1 | **盘口数据换行** | 一个TextRun塞`\n`（docx不渲染） | `clm()`拆分为多个Paragraph，每个数据一行 |
+| 2 | **盘口用语** | "押100元赢36元" | "隐含概率约71%" |
+| 3 | **比分概率** | 只写比分 | 比分表格含独立"概率"列（如~35%） |
+| 4 | **球员名单来源** | 凭记忆写迪马利亚（已退役） | 必须对照FIFA官方26人名单+项目文件验证 |
+| 5 | **位置中文** | GK/CB/ST/DM | 门将/中后卫/前锋/防守中场 |
+| 6 | **小组回顾格式** | 文字段落 `"G1胜... → G2胜..."` | `对手 \| 比分 \| 关键` 表格——与7月4日一致 |
+| 7 | **队名** | ARG/EGY/SUI/COL | 阿根廷/埃及/瑞士/哥伦比亚（中文全称） |
+| 8 | **生成工具** | 手写python-docx.py | 通过 `Skill("docx", ...)` 调用docx skill |
 
 ### 禁止字符（.md 和 .docx 通用）
 
@@ -104,16 +117,18 @@ for evt in j.get('events', []):
 
 | # | 项目 | 格式要求 |
 |---|------|---------|
-| 1 | **首轮球员评分** | 中文名 + 评分 + 表现 + 标注 MOTM 和最低分 |
+| 1 | **首轮球员评分** | 中文名 + 评分 + 表现 + 标注 MOTM 和最低分。🚨 球员必须从FIFA官方名单验证——禁止凭记忆列不在名单的球员 |
 | 2 | **因素导向表** | `因素 \| 对哪边有利 \| 理由` — 每行必须标方向 |
 | 3 | **冷门风险评估** | 低/中/高/极高 + 理由 |
-| 4 | **比分预测** | 首选 + 半场 + ≥2个备选 |
+| 4 | **比分预测** | 首选 + 半场 + **每个比分必须标注概率%(如~35%)** + ≥2个备选 |
 | 5 | **伤病/停赛** | 含"已验证可用替补" |
 | 6 | **强队分类** | 超级巨星型 / 体系型 / 低效热门 |
 | 7 | **亚非韧性评估** | 5项: 低位防守/速度反击/定位球高点/前30分钟/被压制不崩盘 |
 | 8 | **教练博弈** | 落后/领先策略 + 替补改变比赛能力 |
 | 9 | **定位球攻防** | 简评 |
 | 10 | **冷门路径** | 如果翻车，最可能怎么翻 |
+| 11 | 🆕 **小组赛回顾** | **表格格式** `对手 \| 比分 \| 关键` — 禁止用文字段落。与7月4日预测格式一致 |
+| 12 | 🆕 **盘口数据分析** | 独立"盘口分析"栏：含胜平负/让球/大小球/波胆/BTTS/晋级赔率。用隐含概率（如"71%"），不用"押X元赢X" |
 
 ---
 
@@ -451,10 +466,9 @@ for side, team in [('HOME', data['HomeTeam']), ('AWAY', data['AwayTeam'])]:
 - 比 ESPN API 快 ~30 秒（FIFA 官方数据更近源头）
 
 ### AnySearch（主力搜索）
-```bash
-python "C:/Users/Administrator/.claude/skills/anysearch-skill-2.1.0/scripts/anysearch_cli.py" search "query" --max_results 5
-python "C:/Users/Administrator/.claude/skills/anysearch-skill-2.1.0/scripts/anysearch_cli.py" extract "URL"
-```
+> 通过 `Skill("anysearch", ...)` 调用，详见 十、Skill 使用规范。
+> 标准用法: `Skill("anysearch", "search \"query\" --max_results 5")`
+> 全文提取: `Skill("anysearch", "extract \"URL\"")`
 
 ### ESPN API（统计补充 + 赛程发现）
 
@@ -559,4 +573,74 @@ python historical_analyzer.py --trends   # 仅趋势分析
 **文件**: `MODEL_VALIDATION_BACKTEST.md`
 
 > 27场全量回测：方向正确率71%，精确比分6%，平局率37%远超正常28%。
+
+---
+
+## 🔧 十、Skill 使用规范（🚨 强制）
+
+> 以下 skill 是项目专用工具。每次执行对应任务时**必须**通过 Skill 工具调用对应 skill，禁止手写脚本替代。
+
+| 任务 | 使用 Skill | 调用方式 | 说明 |
+|------|:---:|------|------|
+| **搜索** | `anysearch` | `Skill("anysearch", "search ...")` | 所有搜索统一用 anysearch：查新闻/赔率/球员数据/赛季统计/伤病/阵容。禁止用 WebSearch 替代 |
+| **提取网页内容** | `anysearch` | `Skill("anysearch", "extract URL")` | 需要读取完整文章内容时使用 |
+| **生成 .docx** | `docx` | `Skill("docx", "根据预测.md生成docx...")` | 每次写完预测 .md 文件后**必须**生成对应 .docx。禁止手写 python-docx 脚本替代 |
+| **修改/美化 .docx** | `docx` | `Skill("docx", "修改文件...")` | 编辑已有 docx：添加表格/调整格式/修复样式 |
+| **深度研究报告** | `deep-research` | `Skill("deep-research", "问题")` | 需要多源交叉验证的深度分析话题 |
+
+### 10.1 anysearch — 搜索规范
+
+```bash
+# 通用搜索
+Skill("anysearch", "search \"query\" --max_results 5")
+
+# 垂直搜索（金融/体育等→先 get_sub_domains）
+Skill("anysearch", "get_sub_domains --domain sports")
+
+# 批量并行搜索
+Skill("anysearch", "batch_search --query \"A\" --query \"B\" --max_results 5")
+
+# 提取全文
+Skill("anysearch", "extract \"https://...\"")
+```
+
+**何时用 anysearch 而非 WebSearch/WebFetch:**
+- anysearch 是项目指定搜索工具，结果更结构化
+- WebSearch/WebFetch 仅作为 anysearch 不可用时的**最后备选**
+- 每次搜索前先用 anysearch，不要跳过去用 WebSearch
+
+### 10.2 docx — 文档生成规范
+
+**🚨 每次写完预测 .md 后，必须立即用 docx skill 生成对应的 .docx 文件。**
+
+调用格式：
+```
+Skill("docx", "根据 E:\ai\世界杯\2026年X月X日_两场预测.md 的内容生成正式预测报告 docx。要求: 横向A4、微软雅黑9-10pt、深蓝表头白字、隔行灰底、首选行浅绿高亮、三位国家缩写替代国旗、[对][错][待]替代emoji。输出路径: E:\ai\世界杯\2026年X月X日_两场预测.docx")
+```
+
+**docx skill 内部使用 `docx-js` (JavaScript) 生成，不是 python-docx。** 生成后自动运行 `validate.py` 验证。
+
+**禁止的做法:**
+- ❌ 手写 `gen_docx.py` 用 python-docx 生成 → 这是绕开 skill
+- ❌ 生成完 .md 就结束 → 必须接着生成 .docx
+- ❌ 用 emoji 国旗和符号 → docx 中必须用三位缩写和 [对][错][待]
+
+### 10.3 复盘 .docx 也要生成
+
+复盘文件写完后，同样用 `docx` skill 生成对应的 .docx 复盘报告。
+
+---
+
+## 📋 十一、v20 新规则索引（7月7日美国vs比利时复盘）
+
+| # | 规则 | 来源教训 | 强制程度 |
+|:---:|------|------|:---:|
+| 1 | **禁止「无X球员=无攻击力」二元思维** | De Bruyne 0分钟比利时进4球 | [必须] |
+| 2 | **主场优势按对手级别加权** | 美国主场对T4全胜→对T2 1-4 | [必须] |
+| 3 | **禁止单场外推球员状态** | De Ketelaere R32 0球→R16 2球1助 | [必须] |
+| 4 | **Transfermarkt身价检查主观评分** | 4名球员评分偏差>1.0 | [必须] |
+| 5 | **未出场替补不进核心分析** | De Bruyne 0分钟占30%分析篇幅 | [必须] |
+| 6 | **盘口数据纳入因素表** | R16美国-124热门→市场和我们同错 | [必须] |
+
+> 详细规则见 memory/ 对应记忆文件。上述6条已纳入本文件（CLAUDE.md）的预测强制清单。
 
