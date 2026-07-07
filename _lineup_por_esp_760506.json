@@ -1,0 +1,300 @@
+{
+  "portugal": {
+    "team": "Portugal",
+    "formation": "4-2-3-1",
+    "starters": [
+      {
+        "jersey": "1",
+        "name": "Diogo Costa",
+        "pos": "GK",
+        "name_cn": "迪奥戈·科斯塔"
+      },
+      {
+        "jersey": "20",
+        "name": "João Cancelo",
+        "pos": "RB",
+        "name_cn": "若昂·坎塞洛"
+      },
+      {
+        "jersey": "3",
+        "name": "Rúben Dias",
+        "pos": "CB",
+        "name_cn": "鲁本·迪亚斯"
+      },
+      {
+        "jersey": "13",
+        "name": "Renato Veiga",
+        "pos": "CB",
+        "name_cn": "雷纳托·韦加"
+      },
+      {
+        "jersey": "25",
+        "name": "Nuno Mendes",
+        "pos": "LB",
+        "name_cn": "努诺·门德斯"
+      },
+      {
+        "jersey": "23",
+        "name": "Vitinha",
+        "pos": "CM",
+        "name_cn": "维蒂尼亚"
+      },
+      {
+        "jersey": "15",
+        "name": "João Neves",
+        "pos": "CM",
+        "name_cn": "若昂·内维斯"
+      },
+      {
+        "jersey": "18",
+        "name": "Pedro Neto",
+        "pos": "RW",
+        "name_cn": "佩德罗·内托"
+      },
+      {
+        "jersey": "8",
+        "name": "Bruno Fernandes",
+        "pos": "AM",
+        "name_cn": "布鲁诺·费尔南德斯 (B费)"
+      },
+      {
+        "jersey": "11",
+        "name": "João Félix",
+        "pos": "LW",
+        "name_cn": "若昂·费利克斯"
+      },
+      {
+        "jersey": "7",
+        "name": "Cristiano Ronaldo",
+        "pos": "ST",
+        "name_cn": "C罗 (C)"
+      }
+    ],
+    "bench": [
+      {
+        "jersey": "12",
+        "name": "José Sá",
+        "pos": "GK"
+      },
+      {
+        "jersey": "22",
+        "name": "Rui Silva",
+        "pos": "GK"
+      },
+      {
+        "jersey": "2",
+        "name": "Nélson Semedo",
+        "pos": "RB"
+      },
+      {
+        "jersey": "4",
+        "name": "Tomás Araújo",
+        "pos": "CB"
+      },
+      {
+        "jersey": "5",
+        "name": "Diogo Dalot",
+        "pos": "LB/RB"
+      },
+      {
+        "jersey": "14",
+        "name": "Gonçalo Inácio",
+        "pos": "CB"
+      },
+      {
+        "jersey": "6",
+        "name": "Matheus Nunes",
+        "pos": "CM"
+      },
+      {
+        "jersey": "10",
+        "name": "Bernardo Silva",
+        "pos": "RW/AM"
+      },
+      {
+        "jersey": "21",
+        "name": "Rúben Neves",
+        "pos": "DM"
+      },
+      {
+        "jersey": "24",
+        "name": "Samu Costa",
+        "pos": "DM"
+      },
+      {
+        "jersey": "9",
+        "name": "Gonçalo Ramos",
+        "pos": "ST"
+      },
+      {
+        "jersey": "16",
+        "name": "Francisco Trincão",
+        "pos": "RW"
+      },
+      {
+        "jersey": "17",
+        "name": "Rafael Leão",
+        "pos": "LW"
+      },
+      {
+        "jersey": "19",
+        "name": "Gonçalo Guedes",
+        "pos": "FW"
+      },
+      {
+        "jersey": "26",
+        "name": "Francisco Conceição",
+        "pos": "RW"
+      }
+    ]
+  },
+  "spain": {
+    "team": "Spain",
+    "formation": "4-2-3-1",
+    "starters": [
+      {
+        "jersey": "23",
+        "name": "Unai Simón",
+        "pos": "GK",
+        "name_cn": "乌奈·西蒙"
+      },
+      {
+        "jersey": "12",
+        "name": "Pedro Porro",
+        "pos": "RB",
+        "name_cn": "佩德罗·波罗"
+      },
+      {
+        "jersey": "22",
+        "name": "Pau Cubarsí",
+        "pos": "CB",
+        "name_cn": "保·库巴西"
+      },
+      {
+        "jersey": "14",
+        "name": "Aymeric Laporte",
+        "pos": "CB",
+        "name_cn": "埃梅里克·拉波尔特"
+      },
+      {
+        "jersey": "24",
+        "name": "Marc Cucurella",
+        "pos": "LB",
+        "name_cn": "马克·库库雷利亚"
+      },
+      {
+        "jersey": "16",
+        "name": "Rodri",
+        "pos": "DM",
+        "name_cn": "罗德里 (C)"
+      },
+      {
+        "jersey": "20",
+        "name": "Pedri",
+        "pos": "CM",
+        "name_cn": "佩德里"
+      },
+      {
+        "jersey": "19",
+        "name": "Lamine Yamal",
+        "pos": "RW",
+        "name_cn": "拉明·亚马尔"
+      },
+      {
+        "jersey": "10",
+        "name": "Dani Olmo",
+        "pos": "AM",
+        "name_cn": "达尼·奥尔莫"
+      },
+      {
+        "jersey": "15",
+        "name": "Álex Baena",
+        "pos": "LW",
+        "name_cn": "阿莱士·巴埃纳"
+      },
+      {
+        "jersey": "21",
+        "name": "Mikel Oyarzabal",
+        "pos": "ST",
+        "name_cn": "米克尔·奥亚萨瓦尔"
+      }
+    ],
+    "bench": [
+      {
+        "jersey": "1",
+        "name": "David Raya",
+        "pos": "GK"
+      },
+      {
+        "jersey": "13",
+        "name": "Joan García",
+        "pos": "GK"
+      },
+      {
+        "jersey": "2",
+        "name": "Marc Pubill",
+        "pos": "RB"
+      },
+      {
+        "jersey": "3",
+        "name": "Alejandro Grimaldo",
+        "pos": "LB"
+      },
+      {
+        "jersey": "4",
+        "name": "Eric García",
+        "pos": "CB"
+      },
+      {
+        "jersey": "5",
+        "name": "Marcos Llorente",
+        "pos": "RB/CM"
+      },
+      {
+        "jersey": "6",
+        "name": "Mikel Merino",
+        "pos": "CM"
+      },
+      {
+        "jersey": "8",
+        "name": "Fabián Ruiz",
+        "pos": "CM"
+      },
+      {
+        "jersey": "9",
+        "name": "Gavi",
+        "pos": "CM"
+      },
+      {
+        "jersey": "18",
+        "name": "Martín Zubimendi",
+        "pos": "DM"
+      },
+      {
+        "jersey": "7",
+        "name": "Ferran Torres",
+        "pos": "FW"
+      },
+      {
+        "jersey": "11",
+        "name": "Yeremy Pino",
+        "pos": "RW"
+      },
+      {
+        "jersey": "17",
+        "name": "Nico Williams",
+        "pos": "LW"
+      },
+      {
+        "jersey": "25",
+        "name": "Víctor Muñoz",
+        "pos": "CM"
+      },
+      {
+        "jersey": "26",
+        "name": "Borja Iglesias",
+        "pos": "ST"
+      }
+    ]
+  }
+}

@@ -1,0 +1,320 @@
+{
+  "United States": {
+    "starters": [
+      {
+        "jersey": "24",
+        "name": "Matt Freese",
+        "pos": "Goalkeeper",
+        "starter": true
+      },
+      {
+        "jersey": "13",
+        "name": "Tim Ream",
+        "pos": "Center Left Defender",
+        "starter": true
+      },
+      {
+        "jersey": "3",
+        "name": "Chris Richards",
+        "pos": "Center Right Defender",
+        "starter": true
+      },
+      {
+        "jersey": "5",
+        "name": "Antonee Robinson",
+        "pos": "Left Back",
+        "starter": true
+      },
+      {
+        "jersey": "16",
+        "name": "Alex Freeman",
+        "pos": "Right Back",
+        "starter": true
+      },
+      {
+        "jersey": "4",
+        "name": "Tyler Adams",
+        "pos": "Center Midfielder",
+        "starter": true
+      },
+      {
+        "jersey": "17",
+        "name": "Malik Tillman",
+        "pos": "Left Midfielder",
+        "starter": true
+      },
+      {
+        "jersey": "8",
+        "name": "Weston McKennie",
+        "pos": "Right Midfielder",
+        "starter": true
+      },
+      {
+        "jersey": "20",
+        "name": "Folarin Balogun",
+        "pos": "Forward",
+        "starter": true
+      },
+      {
+        "jersey": "10",
+        "name": "Christian Pulisic",
+        "pos": "Left Forward",
+        "starter": true
+      },
+      {
+        "jersey": "2",
+        "name": "Sergiño Dest",
+        "pos": "Right Forward",
+        "starter": true
+      }
+    ],
+    "bench": [
+      {
+        "jersey": "12",
+        "name": "Miles Robinson",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "9",
+        "name": "Ricardo Pepi",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "21",
+        "name": "Timothy Weah",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "18",
+        "name": "Max Arfsten",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "1",
+        "name": "Matt Turner",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "11",
+        "name": "Brenden Aaronson",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "26",
+        "name": "Alejandro Zendejas",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "7",
+        "name": "Giovanni Reyna",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "23",
+        "name": "Joe Scally",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "25",
+        "name": "Chris Brady",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "6",
+        "name": "Auston Trusty",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "22",
+        "name": "Mark McKenzie",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "19",
+        "name": "Haji Wright",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "14",
+        "name": "Sebastian Berhalter",
+        "pos": "Substitute",
+        "starter": false
+      }
+    ]
+  },
+  "Belgium": {
+    "starters": [
+      {
+        "jersey": "1",
+        "name": "Thibaut Courtois",
+        "pos": "Goalkeeper",
+        "starter": true
+      },
+      {
+        "jersey": "25",
+        "name": "Nathan Ngoy",
+        "pos": "Center Left Defender",
+        "starter": true
+      },
+      {
+        "jersey": "4",
+        "name": "Brandon Mechele",
+        "pos": "Center Right Defender",
+        "starter": true
+      },
+      {
+        "jersey": "5",
+        "name": "Maxim De Cuyper",
+        "pos": "Left Back",
+        "starter": true
+      },
+      {
+        "jersey": "21",
+        "name": "Timothy Castagne",
+        "pos": "Right Back",
+        "starter": true
+      },
+      {
+        "jersey": "8",
+        "name": "Youri Tielemans",
+        "pos": "Attacking Midfielder",
+        "starter": true
+      },
+      {
+        "jersey": "24",
+        "name": "Amadou Onana",
+        "pos": "Left Midfielder",
+        "starter": true
+      },
+      {
+        "jersey": "23",
+        "name": "Nicolas Raskin",
+        "pos": "Right Midfielder",
+        "starter": true
+      },
+      {
+        "jersey": "17",
+        "name": "Charles De Ketelaere",
+        "pos": "Forward",
+        "starter": true
+      },
+      {
+        "jersey": "10",
+        "name": "Leandro Trossard",
+        "pos": "Attacking Midfielder Left",
+        "starter": true
+      },
+      {
+        "jersey": "14",
+        "name": "Dodi Lukébakio",
+        "pos": "Attacking Midfielder Right",
+        "starter": true
+      }
+    ],
+    "bench": [
+      {
+        "jersey": "9",
+        "name": "Romelu Lukaku",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "19",
+        "name": "Diego Moreira",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "22",
+        "name": "Alexis Saelemaekers",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "26",
+        "name": "Matias Fernandez-Pardo",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "15",
+        "name": "Thomas Meunier",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "20",
+        "name": "Hans Vanaken",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "12",
+        "name": "Senne Lammens",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "11",
+        "name": "Jérémy Doku",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "7",
+        "name": "Kevin De Bruyne",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "6",
+        "name": "Axel Witsel",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "13",
+        "name": "Mike Penders",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "3",
+        "name": "Arthur Theate",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "18",
+        "name": "Joaquin Seys",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "2",
+        "name": "Zeno Debast",
+        "pos": "Substitute",
+        "starter": false
+      },
+      {
+        "jersey": "16",
+        "name": "Koni De Winter",
+        "pos": "Substitute",
+        "starter": false
+      }
+    ]
+  }
+}

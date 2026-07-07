@@ -1,366 +1,358 @@
 # -*- coding: utf-8 -*-
-"""Generate 2026-07-07 predictions DOCX — Portugal vs Spain + USA vs Belgium."""
+"""Generate 2026-07-07 predictions DOCX — Portugal vs Spain + USA vs Belgium.
+All lineups verified against player_database_0707.md. C罗 rating corrected per database (€8M, 0 non-penalty goals vs strong teams)."""
 
 from docx import Document
-from docx.shared import Inches, Pt, Cm, RGBColor, Emu
+from docx.shared import Inches, Pt, Cm, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.section import WD_ORIENT
-from docx.oxml.ns import qn
-from docx.oxml import OxmlElement
+from docx.oxml.ns import qn, nsdecls
+from docx.oxml import parse_xml
 import os
 
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "2026年7月7日_两场预测.docx")
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "2026年7月7日_两场预测_v3.docx")
 
 doc = Document()
-NAVY=RGBColor(0x1A,0x2E,0x3D); WHITE=RGBColor(0xFF,0xFF,0xFF); ALT_ROW=RGBColor(0xF5,0xF7,0xFA)
-PREF_ROW=RGBColor(0xE8,0xF5,0xE9); BORDER=RGBColor(0xD0,0xD5,0xDD); RED_T=RGBColor(0xC0,0x39,0x2B)
-DARK=RGBColor(0x1A,0x1A,0x2E); META=RGBColor(0x7F,0x8C,0x8D); META_L=RGBColor(0x95,0xA5,0xA6)
-BLUE_T=RGBColor(0x2E,0x75,0xB6); FONT='微软雅黑'
 
-for sec in doc.sections:
-    sec.orientation = WD_ORIENT.LANDSCAPE
-    sec.page_width=Cm(29.7); sec.page_height=Cm(21.0)
-    sec.left_margin=Cm(1.2); sec.right_margin=Cm(1.2); sec.top_margin=Cm(1.0); sec.bottom_margin=Cm(1.0)
+for section in doc.sections:
+    section.orientation = WD_ORIENT.LANDSCAPE
+    section.page_width = Cm(29.7)
+    section.page_height = Cm(21.0)
+    section.left_margin = Cm(1.5)
+    section.right_margin = Cm(1.5)
+    section.top_margin = Cm(1.2)
+    section.bottom_margin = Cm(1.2)
 
-def sf(run, size=None, color=None, bold=False, font=FONT):
-    run.font.name=font; run._element.rPr.rFonts.set(qn('w:eastAsia'),font)
-    if size: run.font.size=Pt(size)
-    if color: run.font.color.rgb=color
-    run.bold=bold
+style = doc.styles['Normal']
+font = style.font
+font.name = '微软雅黑'
+font.size = Pt(9.5)
+style.element.rPr.rFonts.set(qn('w:eastAsia'), '微软雅黑')
 
-def arun(p,text,**kw):
-    r=p.add_run(text); sf(r,**kw); return r
+DARK   = RGBColor(0x1A, 0x1A, 0x2E)
+ACCENT = RGBColor(0xC0, 0x39, 0x2B)
+WHITE  = RGBColor(0xFF, 0xFF, 0xFF)
+LIGHT_GRAY = RGBColor(0xF2, 0xF2, 0xF2)
+HEADER_BG  = RGBColor(0x1A, 0x1A, 0x2E)
+GREEN_BG   = RGBColor(0x27, 0xAE, 0x60)
+ORANGE_BG  = RGBColor(0xF3, 0x9C, 0x12)
+LIGHT_GREEN_BG = RGBColor(0xE8, 0xF8, 0xF5)
 
-def mp(before=0,after=0,align=None,border=False,bc='2E75B6'):
-    p=doc.add_paragraph()
-    p.paragraph_format.space_before=Pt(before); p.paragraph_format.space_after=Pt(after)
-    if align is not None: p.alignment=align
-    if border:
-        pPr=p._p.get_or_add_pPr(); pBdr=OxmlElement('w:pBdr')
-        bot=OxmlElement('w:bottom')
-        for a,v in [('w:val','single'),('w:sz','4'),('w:space','4'),('w:color',bc)]: bot.set(qn(a),v)
-        pBdr.append(bot)
-        for tag in ['w:spacing','w:ind','w:jc','w:rPr']:
-            el=pPr.find(qn(tag))
-            if el is not None: pPr.insert(list(pPr).index(el),pBdr); break
-        else: pPr.append(pBdr)
+def set_cell(cell, text, bold=False, size=Pt(9), color=None, bg=None, align='center'):
+    cell.text = ''
+    p = cell.paragraphs[0]
+    p.alignment = {'center': WD_ALIGN_PARAGRAPH.CENTER,
+                   'left': WD_ALIGN_PARAGRAPH.LEFT}.get(align, WD_ALIGN_PARAGRAPH.CENTER)
+    run = p.add_run(str(text))
+    run.bold = bold
+    run.font.size = size
+    run.font.name = '微软雅黑'
+    run._element.rPr.rFonts.set(qn('w:eastAsia'), '微软雅黑')
+    if color:
+        run.font.color.rgb = color
+    if bg:
+        shading = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{str(bg)}"/>')
+        cell._tc.get_or_add_tcPr().append(shading)
+    tc = cell._tc
+    tcPr = tc.get_or_add_tcPr()
+    vAlign = parse_xml(f'<w:vAlign {nsdecls("w")} w:val="center"/>')
+    tcPr.append(vAlign)
+
+def set_cell_left(cell, text, bold=False, size=Pt(9), color=None):
+    set_cell(cell, text, bold=bold, size=size, color=color, align='left')
+
+def add_heading_styled(text, level=1):
+    h = doc.add_heading(text, level=level)
+    for run in h.runs:
+        run.font.name = '微软雅黑'
+        run._element.rPr.rFonts.set(qn('w:eastAsia'), '微软雅黑')
+    return h
+
+def add_para(text, bold=False, size=Pt(10), color=None, align='left', space_after=Pt(4)):
+    p = doc.add_paragraph()
+    p.alignment = {'left': WD_ALIGN_PARAGRAPH.LEFT,
+                   'center': WD_ALIGN_PARAGRAPH.CENTER}.get(align, WD_ALIGN_PARAGRAPH.LEFT)
+    pf = p.paragraph_format
+    pf.space_after = space_after
+    pf.space_before = Pt(2)
+    run = p.add_run(text)
+    run.bold = bold
+    run.font.size = size
+    run.font.name = '微软雅黑'
+    run._element.rPr.rFonts.set(qn('w:eastAsia'), '微软雅黑')
+    if color:
+        run.font.color.rgb = color
     return p
 
-def h1(t): return arun(mp(before=16,after=4,border=True,bc='C0392B'),t,size=16,bold=True,color=RED_T)
-def h2(t): return arun(mp(before=12,after=3),t,size=12,bold=True,color=DARK)
-def body(t,size=8.5,color=None):
-    p=mp(before=1,after=2); arun(p,t,size=size,color=color or DARK); return p
-def meta(t): return arun(mp(before=2,after=2),t,size=7,color=META)
+# ═══ TITLE ═══
+doc.add_paragraph()
+add_para('2026 FIFA 世界杯', bold=True, size=Pt(28), color=ACCENT, align='center', space_after=Pt(2))
+add_para('7月7日 16强淘汰赛 预测报告', bold=True, size=Pt(18), color=DARK, align='center', space_after=Pt(6))
+add_para('葡萄牙 vs 西班牙  |  美国 vs 比利时', bold=False, size=Pt(11), color=RGBColor(0x7F,0x8C,0x8D), align='center', space_after=Pt(10))
+add_para('Round of 16  |  AT&T Stadium (达拉斯) / Lumen Field (西雅图)', bold=False, size=Pt(10), color=RGBColor(0x7F,0x8C,0x8D), align='center', space_after=Pt(18))
 
-def _shade(cell,clr):
-    shading=OxmlElement('w:shd'); shading.set(qn('w:fill'),str(clr)); shading.set(qn('w:val'),'clear')
-    cell._tc.get_or_add_tcPr().append(shading)
+add_para('生成: 2026年7月7日 BJT  |  阵容: player_database_0707.md + 媒体交叉验证',
+         size=Pt(8), color=RGBColor(0x95,0xA5,0xA6), align='center', space_after=Pt(4))
+add_para('数据源: player_database_0707.md + Sporting News + Fox Sports + RotoWire  |  CLAUDE.md v18',
+         size=Pt(8), color=RGBColor(0x95,0xA5,0xA6), align='center', space_after=Pt(6))
+add_para('[修正] C罗评分8.0->7.0(€8M/对强队0运动战进球) | 西班牙首发修正(波罗+奥尔莫) | 比利时首发修正(梅赫勒+瓦纳肯+德克特拉雷)',
+         size=Pt(8), color=ACCENT, align='center', space_after=Pt(20))
 
-def _cb(cell,clr=BORDER,sz='4'):
-    tcPr=cell._tc.get_or_add_tcPr(); borders=OxmlElement('w:tcBorders')
-    for edge in ['top','bottom','left','right']:
-        b=OxmlElement(f'w:{edge}')
-        for a,v in [('w:val','single'),('w:sz',sz),('w:color',str(clr)),('w:space','0')]: b.set(qn(a),v)
-        borders.append(b)
-    tcPr.append(borders)
+# ═══ SUMMARY ═══
+add_heading_styled('预测汇总', level=2)
+sd = [['#','比赛 (BJT)','身价比','强队分类','首选比分','半场','备选比分','冷门风险'],
+      ['93','POR vs ESP (03:00)','1:1.32','双方均\n超巨型','西班牙 2-1\n葡萄牙','1-0','1-1(加时/点球)\n2-0 / 葡萄牙2-1','中高'],
+      ['94','USA vs BEL (08:00)','1:1.54','BEL:\n体系型','美国 2-1\n比利时','1-0','1-1(加时)\n2-0 / 比利时2-1','中']]
+table = doc.add_table(rows=3, cols=8)
+table.alignment = WD_TABLE_ALIGNMENT.CENTER
+cw = [0.28,1.85,0.55,0.72,1.05,0.50,1.30,0.50]
+for i,w in enumerate(cw):
+    for row in table.rows: row.cells[i].width = Inches(w)
+for j,t in enumerate(sd[0]): set_cell(table.rows[0].cells[j],t,bold=True,size=Pt(9),color=WHITE,bg=HEADER_BG)
+for i,rd in enumerate(sd[1:],1):
+    bg = LIGHT_GRAY if i%2==0 else None
+    for j,t in enumerate(rd):
+        a='left' if j==1 else 'center'
+        if j==1: set_cell_left(table.rows[i].cells[j],t,size=Pt(9))
+        else: set_cell(table.rows[i].cells[j],t,bold=(j==4),size=Pt(9),bg=bg)
+for ri in [1,2]: set_cell(table.rows[ri].cells[7],sd[ri][7],bold=True,size=Pt(9),color=WHITE,bg=ORANGE_BG)
+doc.add_paragraph()
 
-def cpara(cell,text,size=8,bold=False,color=None,align=None):
-    for pp in cell.paragraphs: pp.clear()
-    p=cell.paragraphs[0]
-    p.paragraph_format.space_before=Pt(1); p.paragraph_format.space_after=Pt(1)
-    if align is not None: p.alignment=align
-    r=p.add_run(str(text)); sf(r,size=size,bold=bold,color=color or DARK); return p
+# ═══ POR vs ESP ═══
+add_heading_styled('比赛93: POR 葡萄牙 vs ESP 西班牙  (03:00 BJT | AT&T Stadium, 达拉斯 | 室内)', level=2)
+add_para('16强 | QF: USA/BEL胜者 | FIFA #7 vs #3 | €957M vs €1.267B (1:1.32) | ESP 4场零封(12-0) | POR 防守存疑(4场失4球)',
+         size=Pt(9), color=RGBColor(0x7F,0x8C,0x8D))
 
-def make_table(headers,rows,widths,pref=None):
-    tbl=doc.add_table(rows=1+len(rows),cols=len(headers))
-    tbl.alignment=WD_TABLE_ALIGNMENT.CENTER; tbl.autofit=False
-    for i,h in enumerate(headers):
-        c=tbl.rows[0].cells[i]; _shade(c,NAVY)
-        cpara(c,h,size=7.5,bold=True,color=WHITE,align=WD_ALIGN_PARAGRAPH.CENTER)
-        _cb(c,clr=RGBColor(0x15,0x29,0x38))
-    for ri,row in enumerate(rows):
-        for ci,val in enumerate(row):
-            c=tbl.rows[ri+1].cells[ci]
-            if pref is not None and ri==pref: _shade(c,PREF_ROW)
-            elif ri%2==0: _shade(c,ALT_ROW)
-            al=WD_ALIGN_PARAGRAPH.CENTER if ci<2 else None
-            cpara(c,val,size=7.5,align=al); _cb(c)
-    for row in tbl.rows:
-        for i,w in enumerate(widths): row.cells[i].width=Cm(w)
-    return tbl
+add_para('预测首发 (player_database_0707.md + 媒体交叉)', bold=True, size=Pt(10), color=DARK)
+add_para('POR (4-2-3-1): 迪奥戈·科斯塔 | 坎塞洛 鲁本·迪亚斯[黄] 雷纳托·韦加 努诺·门德斯 | 维蒂尼亚 若昂·内维斯 | 佩德罗·内托 B费 拉斐尔·莱昂 | C罗',
+         size=Pt(9), color=DARK, space_after=Pt(2))
+add_para('ESP (4-3-3): 乌奈·西蒙 | 佩德罗·波罗 库巴西 拉波尔特 库库雷利亚 | 罗德里 佩德里 奥尔莫 | 亚马尔 奥亚萨瓦尔 巴埃纳',
+         size=Pt(9), color=DARK, space_after=Pt(2))
+add_para('[修正] ESP首发修正: RB波罗(热刺€50M,对奥地利进球!)替代略伦特 | CM奥尔莫(巴萨€50M)替代梅里诺. POR LW莱昂(€90M,对克罗地亚助攻)修正为费利克斯.',
+         size=Pt(7), color=ACCENT, space_after=Pt(6))
 
-# header/footer
-for sec in doc.sections:
-    h=sec.header; h.is_linked_to_previous=False
-    hp0=h.paragraphs[0]; hp0.alignment=WD_ALIGN_PARAGRAPH.RIGHT; hp0.paragraph_format.space_after=Pt(2)
-    r=hp0.add_run('2026 FIFA 世界杯 · 7月7日 两场预测报告')
-    sf(r,size=7,color=META_L,font='Arial'); r._element.rPr.rFonts.set(qn('w:eastAsia'),FONT)
-    pPr=hp0._p.get_or_add_pPr(); pBdr=OxmlElement('w:pBdr'); bot=OxmlElement('w:bottom')
-    for a,v in [('w:val','single'),('w:sz','4'),('w:space','4'),('w:color','95A5A6')]: bot.set(qn(a),v)
-    pBdr.append(bot); pPr.insert(0,pBdr)
-    f=sec.footer; f.is_linked_to_previous=False
-    fp=f.paragraphs[0]; fp.alignment=WD_ALIGN_PARAGRAPH.CENTER; fp.paragraph_format.space_before=Pt(2)
-    rp=fp.add_run(); sf(rp,size=7,color=META_L,font='Arial'); rp._element.rPr.rFonts.set(qn('w:eastAsia'),FONT)
-    fc1=OxmlElement('w:fldChar'); fc1.set(qn('w:fldCharType'),'begin'); rp._r.append(fc1)
-    it=OxmlElement('w:instrText'); it.set(qn('xml:space'),'preserve'); it.text=' PAGE '; rp._r.append(it)
-    fc2=OxmlElement('w:fldChar'); fc2.set(qn('w:fldCharType'),'end'); rp._r.append(fc2)
+# Player Ratings
+add_para('核心球员评分 (来源: player_database_0707.md)', bold=True, size=Pt(10), color=DARK)
+pr = [['#','球员','评分','位置','关键标注'],
+      ['16','罗德里 (ESP)','9.0','DM','[MOTM候选] 金球奖得主. 曼城€130M'],
+      ['19','拉明·亚马尔 (ESP)','9.0','RW','[MOTM候选] 18岁€200M. 本届最佳边锋'],
+      ['21','奥亚萨瓦尔 (ESP)','8.5','ST','4球. 近16场首发17球. 皇社€45M'],
+      ['20','佩德里 (ESP)','8.5','CM','巴萨核心€80M'],
+      ['8','B费 (POR)','8.5','AM','[关键] 曼联€85M. 创造力中枢'],
+      ['4','鲁本·迪亚斯 (POR)','8.5','CB','[注意][黄] 曼城€80M. 背牌收敛30%(StatsBomb)'],
+      ['2','佩德罗·波罗 (ESP)','8.0','RB','[修正] 热刺€50M. 对奥地利头球破门!'],
+      ['23','乌奈·西蒙 (ESP)','8.0','GK','519分钟不失球纪录. 毕尔巴鄂€25M'],
+      ['17','拉斐尔·莱昂 (POR)','8.0','LW','[修正] AC米兰€90M. 对克罗地亚助攻. 防守存疑但攻击顶级'],
+      ['10','达尼·奥尔莫 (ESP)','8.0','AM','[修正] 巴萨€50M. 7/4训练减量但可出战'],
+      ['7','C罗 (POR)[C]','7.0','ST','[修正] 41岁€8M(沙特). 对弱队2球(运动战)+克罗地亚点球. 对强队0运动战进球'],
+      ['9','贡萨洛·拉莫斯 (POR)','7.5','ST','[超级替补] PSG€50M. 对克罗地亚90+4绝杀'],
+      ['—','尼科·威廉斯 (ESP)','—','LW','[缺席] 内收肌—西班牙左路爆破减半']]
+prt = doc.add_table(rows=len(pr), cols=5); prt.alignment = WD_TABLE_ALIGNMENT.CENTER
+for j,t in enumerate(pr[0]): set_cell(prt.rows[0].cells[j],t,bold=True,size=Pt(8),color=WHITE,bg=HEADER_BG)
+for i,row in enumerate(pr[1:],1):
+    for j,t in enumerate(row):
+        c='left' if j in[1,4] else 'center'
+        bg=LIGHT_GREEN_BG if 'MOTM候选' in row[4] else (LIGHT_GRAY if i%2==0 else None)
+        clr=ACCENT if '[注意]' in row[4] or '[修正]' in row[4] else None
+        if c=='left': set_cell_left(prt.rows[i].cells[j],t,size=Pt(8),color=clr)
+        else: set_cell(prt.rows[i].cells[j],t,size=Pt(8),color=clr,bg=bg)
+for row in prt.rows:
+    row.cells[0].width=Inches(0.35); row.cells[1].width=Inches(2.2)
+    row.cells[2].width=Inches(0.45); row.cells[3].width=Inches(0.7); row.cells[4].width=Inches(4.8)
+doc.add_paragraph()
 
-# COVER
-p=mp(before=60,after=4,align=WD_ALIGN_PARAGRAPH.CENTER); arun(p,'2026 FIFA 世界杯',size=26,bold=True,color=RED_T)
-p=mp(before=2,after=6,align=WD_ALIGN_PARAGRAPH.CENTER); arun(p,'淘汰赛十六强 · 7月7日 两场预测报告',size=15,bold=True,color=DARK)
-p=mp(before=2,after=2,align=WD_ALIGN_PARAGRAPH.CENTER); arun(p,'葡萄牙 vs 西班牙  |  美国 vs 比利时',size=12,bold=True,color=BLUE_T)
-p=mp(before=16,after=0,align=WD_ALIGN_PARAGRAPH.CENTER); arun(p,'预测时间: 2026年7月5日 08:00 北京时间',size=8.5,color=META)
-p=mp(before=2,after=2,align=WD_ALIGN_PARAGRAPH.CENTER); arun(p,'数据来源: FIFA API + ESPN API + Sports Mole + Last Word On Football + Sky Sports + Yahoo Sports',size=7,color=META_L)
-p=mp(before=8,after=10,align=WD_ALIGN_PARAGRAPH.CENTER); arun(p,'[注意] 官方首发尚未公布 — 阵容基于R32实际+媒体预测 — 赛前1小时拉ESPN roster更新',size=7,color=RED_T)
+# Factors
+add_para('因素导向表', bold=True, size=Pt(10), color=DARK)
+ft = [['因素','有利方','理由'],
+      ['西班牙体系完整: 4场12-0(零封)','ESP ★★','铁律12降级: 零封对手均非超巨型. 从未面对C罗+B费+莱昂'],
+      ['尼科·威廉斯缺阵: 左路爆破减半','POR ★★','巴埃纳(€50M)远不如威廉斯. 坎塞洛防守压力骤减'],
+      ['C罗+B费+莱昂: 3核心攻击线','POR ★★★','莱昂€90M(对克罗地亚助攻)+B费€85M. C罗€8M对强队0运动战进球—非超巨'],
+      ['C罗对强队0运动战进球: 41岁€8M','ESP ★★','[修正] 仅对乌兹别克斯坦运动战破门. 面对4场零封防线=运动战破门概率极低. 威胁限于点球+定位球'],
+      ['葡萄牙防守不稳: 4场失4球','ESP ★★','对刚果金+哥伦比亚均失球. 面对西班牙12-0控制力=最大考验'],
+      ['亚马尔 vs 努诺·门德斯: €200M vs PSG','ESP ★★','西班牙最强对位. 亚马尔可切可传'],
+      ['罗德里 vs 维蒂尼亚: 金球奖vs欧冠冠军','ESP ★★','罗德里世界第一. 维蒂尼亚+内维斯=PSG欧冠级不弱'],
+      ['室内球场: 气候受控','均势','纯实力对决. 西班牙体系优势被放大'],
+      ['2025欧国联决赛: 葡萄牙点球胜','POR ★','最近交手心理优势']]
+ftt = doc.add_table(rows=len(ft), cols=3); ftt.alignment = WD_TABLE_ALIGNMENT.CENTER
+for j,t in enumerate(ft[0]): set_cell(ftt.rows[0].cells[j],t,bold=True,size=Pt(9),color=WHITE,bg=HEADER_BG)
+for i,row in enumerate(ft[1:],1):
+    set_cell_left(ftt.rows[i].cells[0],row[0],size=Pt(8.5))
+    clr=ACCENT if '★★★' in row[1] else None
+    set_cell(ftt.rows[i].cells[1],row[1],size=Pt(8.5),color=clr)
+    set_cell_left(ftt.rows[i].cells[2],row[2],size=Pt(8.5))
+for row in ftt.rows:
+    row.cells[0].width=Inches(3.2); row.cells[1].width=Inches(1.5); row.cells[2].width=Inches(5.8)
+doc.add_paragraph()
 
-# SUMMARY
-h1('一、预测汇总')
-meta('数据截至: 2026-07-05 08:00 CST | 淘汰赛十六强 | 所有时间均为北京时间 (UTC+8)')
-make_table(
-    ['#','时间(BJT)','阶段','比赛','身价比','首选','概率','备选','冷门风险'],
-    [['93','03:00','十六强','葡萄牙 vs 西班牙','1:1.32','西班牙 2-1','~38%','1-1(加时) / 西班牙 2-0 / 葡萄牙 2-1','中高'],
-     ['94','08:00','十六强','美国 vs 比利时','1:1.54','美国 2-1','~40%','1-1(加时) / 美国 2-0 / 比利时 1-0','中']],
-    widths=[0.5,1.3,1.0,2.8,1.1,2.0,1.0,4.2,1.2],
-)
+add_para('强队分类: 葡萄牙(超级巨星型, €957M: B费€85M+莱昂€90M+迪亚斯€80M) vs 西班牙(超级巨星型, €1.267B: 亚马尔€200M+罗德里€130M+佩德里€80M)',
+         size=Pt(8.5), color=RGBColor(0x55,0x55,0x55), space_after=Pt(2))
+add_para('冷门风险: 中高 | ESP 4场零封含金量待检验(铁律12) | POR超巨破局能力 | 威廉斯缺阵=左路爆破减半',
+         bold=True, size=Pt(9), color=ORANGE_BG, space_after=Pt(6))
 
-# BRACKET
-h1('二、淘汰赛路径')
-make_table(
-    ['日期(北京时间)','阶段','对阵','场地'],
-    [['7/6 04:00','十六强','巴西 vs 挪威','MetLife球场, 新泽西'],
-     ['7/6 08:00','十六强','墨西哥 vs 英格兰','阿兹特克球场, 墨西哥城(2240m)'],
-     ['7/7 03:00','十六强','葡萄牙 vs 西班牙','AT&T球场, 阿灵顿'],
-     ['7/7 08:00','十六强','美国 vs 比利时','流明球场, 西雅图'],
-     ['7/10','四分之一决赛','POR/ESP胜者 vs USA/BEL胜者','SoFi球场, 洛杉矶']],
-    widths=[3.0,1.5,4.5,4.3],
-)
-p=mp(before=4,after=0); arun(p,'四分之一决赛路径: 葡萄牙/西班牙胜者 vs 美国/比利时胜者 → 半决赛 vs 巴拉圭/法国/加拿大/摩洛哥胜者 (7/14 阿灵顿)',size=8,bold=True,color=BLUE_T)
+add_para('比分预测', bold=True, size=Pt(10), color=DARK)
+pd = [['类型','比分','半场','进球者与逻辑'],
+      ['[首选]','西班牙 2-1 葡萄牙','1-0','奥亚萨瓦尔31\' / C罗58\'(点) / 佩德里73\'. ESP体系控场. POR唯一进球路径=点球+定位球'],
+      ['备选1','1-1 (POR加时/点球)','0-0','C罗67\'(点) / 亚马尔82\'. 双方谨慎→POR加时深度(莱昂+拉莫斯+B席)'],
+      ['备选2','西班牙 2-0 葡萄牙','1-0','亚马尔24\' / 奥亚萨瓦尔55\'. 零封延续至6场'],
+      ['冷门','葡萄牙 2-1 西班牙','0-1','亚马尔18\' / C罗44\'(点) / 莱昂79\'(替补绝杀)']]
+ptt = doc.add_table(rows=5, cols=4); ptt.alignment = WD_TABLE_ALIGNMENT.CENTER
+for j,t in enumerate(pd[0]): set_cell(ptt.rows[0].cells[j],t,bold=True,size=Pt(9),color=WHITE,bg=HEADER_BG)
+for i,row in enumerate(pd[1:],1):
+    bg=LIGHT_GREEN_BG if i==1 else None; fg=GREEN_BG if i==1 else (ACCENT if i==4 else None)
+    set_cell(ptt.rows[i].cells[0],row[0],bold=(i==1),size=Pt(9),bg=bg,color=fg)
+    set_cell(ptt.rows[i].cells[1],row[1],bold=True,size=Pt(10),bg=bg)
+    set_cell(ptt.rows[i].cells[2],row[2],size=Pt(9),bg=bg)
+    set_cell_left(ptt.rows[i].cells[3],row[3],size=Pt(8))
+for row in ptt.rows:
+    row.cells[0].width=Inches(0.7); row.cells[1].width=Inches(1.4)
+    row.cells[2].width=Inches(0.7); row.cells[3].width=Inches(7.7)
+doc.add_paragraph()
 
-# MATCH 1: POR vs ESP
-h1('三、比赛1: 葡萄牙 vs 西班牙')
-meta('7月7日 03:00 北京时间 (7/6 14:00 ET) | AT&T球场, 阿灵顿 | FIFA #5 vs #2 | 历史: 西班牙18胜 葡萄牙7胜 16平')
+# Key battles
+add_para('关键对位', bold=True, size=Pt(10), color=DARK)
+bt_data = [['对位','详情','预判'],
+           ['库巴西(18) vs C罗(41)','18岁巴萨天才 vs 41岁6届传奇. 经验差23年','C罗运动战难破门. 禁区经验可制造点球'],
+           ['亚马尔 vs 努诺·门德斯','€200M超巨 vs PSG左后卫€65M','ESP最大优势. 亚马尔传中=奥亚萨瓦尔终结'],
+           ['罗德里 vs B费','金球奖后腰 vs 创造力核心. 若B费被锁=POR攻击瘫痪','罗德里大概率限制B费'],
+           ['波罗 vs 莱昂','热刺RB€50M(对奥地利进球) vs AC米兰€90M','莱昂速度优势. 波罗进攻强于防守']]
+bt = doc.add_table(rows=5, cols=3); bt.alignment = WD_TABLE_ALIGNMENT.CENTER
+for j,t in enumerate(bt_data[0]): set_cell(bt.rows[0].cells[j],t,bold=True,size=Pt(9),color=WHITE,bg=HEADER_BG)
+for i,row in enumerate(bt_data[1:],1):
+    set_cell(bt.rows[i].cells[0],row[0],bold=True,size=Pt(8.5))
+    set_cell_left(bt.rows[i].cells[1],row[1],size=Pt(8.5))
+    set_cell_left(bt.rows[i].cells[2],row[2],size=Pt(8.5))
+for row in bt.rows:
+    row.cells[0].width=Inches(2.0); row.cells[1].width=Inches(4.5); row.cells[2].width=Inches(4.0)
+doc.add_paragraph()
 
-h2('3.1 基本信息')
-make_table(
-    ['项目','内容'],
-    [['时间','7月7日 03:00 北京时间'],
-     ['场地','AT&T Stadium (Dallas Stadium), 阿灵顿, 美国'],
-     ['FIFA排名','葡萄牙 #5 vs 西班牙 #2'],
-     ['阵容身价','葡萄牙 9.57亿欧元 vs 西班牙 12.67亿欧元 (约1:1.32)'],
-     ['历史交锋','41次: 葡萄牙7胜 西班牙18胜 16平 — 最近: 2025欧国联决赛葡萄牙点球胜'],
-     ['世界杯交锋','2010 R16: 西班牙1-0 / 2018 小组赛: 3-3 (C罗帽子戏法)'],
-     ['西班牙纪录','5场零封 / 519分钟不失球 — 世界杯历史纪录 (超越曾加1990)'],
-     ['晋级奖励','四分之一决赛 vs 美国/比利时胜者 (7/10 洛杉矶)']],
-    widths=[2.5,10.8],
-)
+# ═══ USA vs BEL ═══
+add_heading_styled('比赛94: USA 美国 vs BEL 比利时  (08:00 BJT | Lumen Field, 西雅图 | 68,740人)', level=2)
+add_para('16强 | QF: POR/ESP胜者 | FIFA #11 vs #5 | ~€345M vs €530M (1:1.54) | [注意] 巴洛贡红牌撤销复出 | 多库vs里姆(37)致命对位',
+         size=Pt(9), color=RGBColor(0x7F,0x8C,0x8D))
 
-h2('3.2 小组赛及淘汰赛回顾')
-make_table(
-    ['球队','对手','比分','关键'],
-    [['葡萄牙','刚果民主共和国 (G1)','1-1','内维斯6\' — 非洲大巴逼平'],
-     ['葡萄牙','乌兹别克斯坦 (G2)','5-0','进攻爆发'],
-     ['葡萄牙','哥伦比亚 (G3)','0-0','暴露体系困境'],
-     ['葡萄牙','克罗地亚 (R32)','2-1','C罗68\'(点)+拉莫斯90+4\' — VAR争议'],
-     ['西班牙','佛得角 (G1)','0-0','大巴攻坚难题'],
-     ['西班牙','沙特阿拉伯 (G2)','4-0','进攻全面开花'],
-     ['西班牙','乌拉圭 (G3)','1-0','稳扎稳打'],
-     ['西班牙','奥地利 (R32)','3-0','23射门/2.84xG — 奥亚萨瓦尔2球+波罗1球']],
-    widths=[1.2,2.4,2.2,5.4],
-)
-p=mp(before=4,after=0); arun(p,'[关键] 西班牙: 5场零封=史上最佳防守。葡萄牙: 对克罗地亚逆转展现韧性但依赖VAR。小组赛均对大巴球队暴露攻坚问题。',size=8,bold=True,color=RED_T)
+add_para('预测首发 (player_database_0707.md + 媒体交叉)', bold=True, size=Pt(10), color=DARK)
+add_para('USA (4-2-3-1): 弗里兹 | 弗里曼 理查兹 里姆(37) 罗宾逊 | 亚当斯 蒂尔曼 | 德斯特 麦肯尼 普利西奇(C) | 巴洛贡',
+         size=Pt(9), color=DARK, space_after=Pt(2))
+add_para('BEL (4-2-3-1): 库尔图瓦 | 卡斯塔涅 梅赫勒 泰特 德克伊珀 | 蒂勒曼斯(C) 瓦纳肯 | 多库 德布劳内(C) 特罗萨尔 | 德克特拉雷',
+         size=Pt(9), color=DARK, space_after=Pt(2))
+add_para('[修正] BEL首发修正: CB梅赫勒(€5M/布鲁日)替代法斯 | CM瓦纳肯(€6M/工兵)替代奥纳纳 | CF德克特拉雷(€40M)替代卢卡库. 卢卡库=超级替补(86\'救命球). 德布劳内=那不勒斯(非曼城)/0助攻/未踢满90\'. 多库本届0球0助.',
+         size=Pt(7), color=ACCENT, space_after=Pt(6))
 
-h2('3.3 核心球员评分')
-make_table(
-    ['球队','球员','评分','位置/俱乐部','关键信息'],
-    [['葡萄牙','迪奥戈·科斯塔','7.0','门将 / 波尔图','对克罗地亚多次扑救'],
-     ['葡萄牙','鲁本·迪亚斯','7.8','中卫 / 曼城','防线领袖 — 本届最佳CB之一'],
-     ['葡萄牙','努诺·门德斯','7.5','左后卫 / 巴黎圣日耳曼','左路攻防俱佳'],
-     ['葡萄牙','维蒂尼亚','7.8 [关键]','中场 / 巴黎圣日耳曼','本届葡萄牙最稳定球员'],
-     ['葡萄牙','若昂·内维斯','7.5','中场 / 巴黎圣日耳曼','G1进球 — 21岁已是主力'],
-     ['葡萄牙','布鲁诺·费尔南德斯','7.5','攻击中场 / 曼联','创造机会顶级 — 淘汰赛尚未直接破门'],
-     ['葡萄牙','拉斐尔·莱昂','7.3','左边锋 / AC米兰','替补更危险 — 对克罗地亚助攻绝杀'],
-     ['葡萄牙','C罗 [C]','7.0','中锋 / 利雅得胜利','处子淘汰赛进球(点) — 41岁体能60-70\''],
-     ['葡萄牙','贡萨洛·拉莫斯','8.0 [超级替补]','中锋 / 巴黎圣日耳曼','场均37分钟1球/助'],
-     ['西班牙','乌奈·西蒙','8.5 [MOTM]','门将 / 毕尔巴鄂竞技','519分钟不失球创历史纪录'],
-     ['西班牙','保·库巴西','7.8','中卫 / 巴塞罗那','18岁 — 对抗奥地利高球全胜'],
-     ['西班牙','马克·库库雷利亚','8.0','左后卫 / 切尔西','对奥地利2助攻'],
-     ['西班牙','罗德里','8.5 [MOTM]','后腰 / 曼城','世界第一后腰'],
-     ['西班牙','佩德里','7.8','中场 / 巴塞罗那','创造力核心'],
-     ['西班牙','拉明·亚马尔','8.2 [关键]','右边锋 / 巴塞罗那','本届最火爆新星(€200M)'],
-     ['西班牙','阿莱士·巴埃纳','7.8','左边锋 / 比利亚雷亚尔','对奥地利5次创造机会'],
-     ['西班牙','米克尔·奥亚萨瓦尔','8.3 [关键]','中锋 / 皇家社会','近16场首发17球'],
-     ['西班牙缺阵','尼科·威廉姆斯','—','左边锋 / 毕尔巴鄂竞技','[缺席] 内收肌']],
-    widths=[1.2,3.2,1.6,2.5,4.8],
-)
+# Player Ratings
+add_para('核心球员评分 (来源: player_database_0707.md)', bold=True, size=Pt(10), color=DARK)
+pr2 = [['#','球员','评分','位置','关键标注'],
+       ['1','库尔图瓦 (BEL)','9.0','GK','[MOTM候选] 皇马€25M. 2014在此对美国15扑'],
+       ['10','普利西奇 (USA)[C]','8.5','LW','[关键] AC米兰€50M. 美国队长'],
+       ['9','巴洛贡 (USA)','8.5','ST','[注意] 3球/4场. 红牌撤销复出! 摩纳哥€50M. 状态待验证'],
+       ['10','多库 (BEL)','8.5','RW','[MOTM候选] 曼城€60M. [注意]本届0球0助/R32被56\'换下. 但对里姆速度碾压'],
+       ['7','德布劳内 (BEL)[C]','7.5','AM','[修正] 那不勒斯€55M. 35岁/0助攻/未踢满90\'/R32被56\'换下后球队逆转'],
+       ['5','罗宾逊 (USA)','8.0','LB','富勒姆€30M. 本届最佳左后卫之一'],
+       ['6','麦肯尼 (USA)','8.0','AM','尤文€25M. 对抗+跑动覆盖巨大'],
+       ['8','蒂勒曼斯 (BEL)[C]','8.5','CM','[MOTM候选] 维拉€35M. R32英雄:89\'扳平+120+5\'点球'],
+       ['11','特罗萨尔 (BEL)','8.0','LW','[关键] 阿森纳€45M. 2球1助—常规攻击最强点'],
+       ['4','梅赫勒 (BEL)','6.5','CB','[弱点][修正] 布鲁日€5M. 对塞内加尔被打穿—速度不足'],
+       ['13','里姆 (USA)','7.0','CB','[注意] 37岁€1M. 速度vs多库=致命对位. 亚当斯须协防'],
+       ['9','卢卡库 (BEL)','7.5','ST','[超级替补] 罗马€20M. 86\'救命球. 仅适合30分钟冲刺'],
+       ['17','德克特拉雷 (BEL)','7.0','ST','[修正] 亚特兰大€40M. 首发CF—R32无进球被换下']]
+prt2 = doc.add_table(rows=len(pr2), cols=5); prt2.alignment = WD_TABLE_ALIGNMENT.CENTER
+for j,t in enumerate(pr2[0]): set_cell(prt2.rows[0].cells[j],t,bold=True,size=Pt(8),color=WHITE,bg=HEADER_BG)
+for i,row in enumerate(pr2[1:],1):
+    for j,t in enumerate(row):
+        c='left' if j in[1,4] else 'center'
+        bg=LIGHT_GREEN_BG if 'MOTM候选' in row[4] else (LIGHT_GRAY if i%2==0 else None)
+        clr=ACCENT if '[注意]' in row[4] or '[弱点]' in row[4] or '[修正]' in row[4] else None
+        if c=='left': set_cell_left(prt2.rows[i].cells[j],t,size=Pt(8),color=clr)
+        else: set_cell(prt2.rows[i].cells[j],t,size=Pt(8),color=clr,bg=bg)
+for row in prt2.rows:
+    row.cells[0].width=Inches(0.35); row.cells[1].width=Inches(2.2)
+    row.cells[2].width=Inches(0.45); row.cells[3].width=Inches(0.7); row.cells[4].width=Inches(4.8)
+doc.add_paragraph()
 
-h2('3.4 因素导向')
-make_table(
-    ['因素','有利','理由'],
-    [['西班牙防守: 5场零封 vs 葡萄牙4场3失球','西班牙 ★★★','历史级防线 vs 有漏洞防线'],
-     ['西班牙进攻整体性: 奥亚萨瓦尔+亚马尔+巴埃纳+库库雷利亚','西班牙 ★★★','四维度攻击 — 葡萄牙右路坎塞洛防>攻'],
-     ['威廉姆斯缺阵: 西班牙失去最快反击点','葡萄牙 ★★','努诺·门德斯可更专注锁亚马尔'],
-     ['葡萄牙逆转能力: 对克罗地亚落后→逆转','葡萄牙 ★★','C罗+拉莫斯双重得分方式'],
-     ['替补深度: 拉莫斯(超级替补)+B席+帕利尼亚','葡萄牙 ★★','拉莫斯场均37分钟1球/助 — 加时赛优势方'],
-     ['C罗体能: 41岁仅60-70\'高强度','西班牙 ★','若70\'后仍胶着 — 葡萄牙中锋位置降级'],
-     ['欧国联决赛心理: 葡萄牙点球胜','葡萄牙 ★','最近一次交手 — 但世界杯≠欧国联'],
-     ['身价比 1:1.32 — 十六强最接近对决','均势','<3:1 = 任何结果都可能']],
-    widths=[5.0,1.8,6.5],
-)
+# Factors
+add_para('因素导向表', bold=True, size=Pt(10), color=DARK)
+ft2d = [['因素','有利方','理由'],
+        ['美国主场: 68,740人满座','USA ★★★','本届主场全胜. 波切蒂诺:"美国足球史上最大比赛"'],
+        ['巴洛贡复出: 红牌撤销, 3球射手回归','USA ★★★','[注意] 攻击力恢复双核. 但停赛期训练状态待验证(铁律11)'],
+        ['多库 vs 里姆(37): 速度碾压','BEL ★★★','最致命对位. 多库(€60M)本届0球0助但速度优势真实'],
+        ['库尔图瓦: 世界前三门将','BEL ★★★','淘汰赛门将模式. 但对塞内加尔失2球'],
+        ['德布劳内状态: 35岁/0助攻/未踢满90\'','USA ★★','R32被56\'换下后球队逆转. 亚当斯可针对性锁死'],
+        ['比利时防线速度慢: 梅赫勒被打穿','USA ★★','梅赫勒(€5M)对塞内加尔被爆. 巴洛贡+普利西奇速度可碾压'],
+        ['美国Pochettino高位逼抢','USA ★★','比老龄后场出球=噩梦. 逼抢→失误→反击'],
+        ['比利时攻击便秘: R32前86分钟0射正','USA ★★','对伊朗10人0-0/对埃及1-1. 有组织防守时进攻乏力']]
+ftt2 = doc.add_table(rows=len(ft2d), cols=3); ftt2.alignment = WD_TABLE_ALIGNMENT.CENTER
+for j,t in enumerate(ft2d[0]): set_cell(ftt2.rows[0].cells[j],t,bold=True,size=Pt(9),color=WHITE,bg=HEADER_BG)
+for i,row in enumerate(ft2d[1:],1):
+    set_cell_left(ftt2.rows[i].cells[0],row[0],size=Pt(8.5))
+    clr=ACCENT if '★★★' in row[1] else None
+    set_cell(ftt2.rows[i].cells[1],row[1],size=Pt(8.5),color=clr)
+    set_cell_left(ftt2.rows[i].cells[2],row[2],size=Pt(8.5))
+for row in ftt2.rows:
+    row.cells[0].width=Inches(3.2); row.cells[1].width=Inches(1.5); row.cells[2].width=Inches(5.8)
+doc.add_paragraph()
 
-h2('3.5 强队分类')
-make_table(
-    ['球队','总身价','超巨(>=€80M)','分型'],
-    [['葡萄牙','€957M (T1)','B费(€85M)/莱昂(€90M)/迪亚斯(€80M)','超级巨星型'],
-     ['西班牙','€1,267M (T0)','亚马尔(€200M)/罗德里(€130M)/佩德里(€80M)','超级巨星型']],
-    widths=[1.5,2.0,4.0,3.0],
-)
-p=mp(before=4,after=0); arun(p,'双方均为超级巨星型 — 区别: 西班牙依赖体系+整体, 葡萄牙依赖个人灵光。若西班牙体系运转→大概率胜; 若C罗/莱昂/B费爆发→可翻盘。',size=8,bold=True,color=BLUE_T)
+add_para('强队分类: 比利时=体系型(德布劳内€55M未达超巨阈值+0助攻. 多库€60M核心级0球0助. 对塞内加尔86分钟0射正). 美国=非强队方(主场等效~€345M)',
+         size=Pt(8.5), color=RGBColor(0x55,0x55,0x55), space_after=Pt(2))
+add_para('冷门风险: 中 | 身价比1:1.54=五五开 | 比利时老龄防线vs美国年轻锋线 | 库尔图瓦+德布劳内可单场决定 | 多库vs里姆致命',
+         bold=True, size=Pt(9), color=ORANGE_BG, space_after=Pt(6))
 
-h2('3.6 比分预测')
-make_table(
-    ['首选','概率','半场','逻辑'],
-    [['西班牙 2-1 葡萄牙','~38%','0-0','西班牙控球主导/葡萄牙收缩反击 — 奥亚萨瓦尔58\'+亚马尔72\' — C罗82\'(点)追回'],
-     ['1-1 (加时/点球)','~20%','0-1','莱昂34\' — 西班牙67\'追平 — 加时双方谨慎'],
-     ['西班牙 2-0 葡萄牙','~17%','1-0','奥亚萨瓦尔41\'+佩德里78\' — 零封延续至6场'],
-     ['葡萄牙 2-1 西班牙','~15%','0-1','亚马尔18\' — C罗55\'(点)+拉莫斯88\'绝杀'],
-     ['1-1 (葡萄牙点球/加时)','~10%','—','双方谨慎 — 葡萄牙加时深度优势']],
-    widths=[2.8,1.0,0.8,7.7],pref=0,
-)
-p=mp(before=4,after=0); arun(p,'冷门风险: 中高 | 平局概率约30% | 葡萄牙赢约25% | 十六强历史平局率32.5%',size=8,bold=True,color=RED_T)
+add_para('比分预测', bold=True, size=Pt(10), color=DARK)
+pd2 = [['类型','比分','半场','进球者与逻辑'],
+       ['[首选]','美国 2-1 比利时','1-0','巴洛贡27\'(普利西奇助攻) / 多库52\' / 麦肯尼68\'. 主场+高位逼抢vs老龄防线'],
+       ['备选1','1-1 (加时/点球)','0-0','卢卡库72\'(替补) / 巴洛贡85\'. 双方谨慎. 加时美国深度稍优'],
+       ['备选2','美国 2-0 比利时','1-0','普利西奇34\' / 巴洛贡61\'. 比利时防线被逼抢撕碎'],
+       ['冷门','比利时 2-1 美国','0-1','德布劳内38\' / 卢卡库55\' / 雷纳90+2\'. 库尔图瓦5+神扑+多库爆里姆']]
+ptt2 = doc.add_table(rows=5, cols=4); ptt2.alignment = WD_TABLE_ALIGNMENT.CENTER
+for j,t in enumerate(pd2[0]): set_cell(ptt2.rows[0].cells[j],t,bold=True,size=Pt(9),color=WHITE,bg=HEADER_BG)
+for i,row in enumerate(pd2[1:],1):
+    bg=LIGHT_GREEN_BG if i==1 else None; fg=GREEN_BG if i==1 else (ACCENT if i==4 else None)
+    set_cell(ptt2.rows[i].cells[0],row[0],bold=(i==1),size=Pt(9),bg=bg,color=fg)
+    set_cell(ptt2.rows[i].cells[1],row[1],bold=True,size=Pt(10),bg=bg)
+    set_cell(ptt2.rows[i].cells[2],row[2],size=Pt(9),bg=bg)
+    set_cell_left(ptt2.rows[i].cells[3],row[3],size=Pt(8))
+for row in ptt2.rows:
+    row.cells[0].width=Inches(0.7); row.cells[1].width=Inches(1.4)
+    row.cells[2].width=Inches(0.7); row.cells[3].width=Inches(7.7)
+doc.add_paragraph()
 
-h2('3.7 伤病与停赛')
-make_table(
-    ['球队','球员','状态','影响'],
-    [['西班牙','尼科·威廉姆斯 (左边锋)','[缺席] 内收肌','重大 — 失去最快反击点'],
-     ['西班牙','耶雷米·皮诺 (右边锋)','[缺席] 肩韧带','中等 — 右路深度受损'],
-     ['西班牙','亚马尔/波罗/拉波尔特/奥尔莫','[可出战] 训练减量','负荷管理 — 预计全部首发'],
-     ['葡萄牙','全队健康','[可]','利好 — 完整武器库']],
-    widths=[1.2,3.5,2.5,5.1],
-)
+# Key battles
+add_para('关键对位', bold=True, size=Pt(10), color=DARK)
+bt2d = [['对位','详情','预判'],
+        ['多库 vs 里姆(37)','BEL最强对位. 多库速度+盘带 vs 37岁老将. 亚当斯须向右协防','多库大概率爆点. 美国需双人包夹'],
+        ['巴洛贡 vs 梅赫勒','3球射手(刚复出) vs €5M被打穿过中卫. 巴洛贡逼抢+速度=噩梦','美国高位逼抢下梅赫勒出球失误率高'],
+        ['亚当斯 vs 德布劳内','伯恩茅斯DM vs 35岁那不勒斯0助攻. 若亚当斯协防多库=德布劳内获空间','德布劳内本届低迷但一脚传球仍致命'],
+        ['库尔图瓦 vs 美国攻击群','世界级门将 vs 巴洛贡+普利西奇+麦肯尼. 2014对美国15扑','库尔图瓦会神扑但无法阻止所有']]
+bt2 = doc.add_table(rows=5, cols=3); bt2.alignment = WD_TABLE_ALIGNMENT.CENTER
+for j,t in enumerate(bt2d[0]): set_cell(bt2.rows[0].cells[j],t,bold=True,size=Pt(9),color=WHITE,bg=HEADER_BG)
+for i,row in enumerate(bt2d[1:],1):
+    set_cell(bt2.rows[i].cells[0],row[0],bold=True,size=Pt(8.5))
+    set_cell_left(bt2.rows[i].cells[1],row[1],size=Pt(8.5))
+    set_cell_left(bt2.rows[i].cells[2],row[2],size=Pt(8.5))
+for row in bt2.rows:
+    row.cells[0].width=Inches(2.0); row.cells[1].width=Inches(4.5); row.cells[2].width=Inches(4.0)
+doc.add_paragraph()
 
-h2('3.8 冷门路径')
-body('葡萄牙赢需同时: (1)C罗开场闪电进球(定位球/点球) (2)西班牙首次在本届落后→应变未知 (3)努诺·门德斯锁死亚马尔 (4)马丁内斯65\'上拉莫斯→反击锁定 (5)2018小组赛3-3式个人英雄主义',size=8)
-body('最大不确定性: 西班牙5场零封从未测试过"先失球"场景',size=8,color=RED_T)
+# Risk
+add_heading_styled('修正说明与风险提示', level=2)
+add_para('C罗评分修正 (v18): C罗41岁, €8M身价(沙特联赛). 本届: 5-0乌兹别克斯坦2球(运动战/弱队) + 对克罗地亚点球. 对强队0运动战进球. 评分从8.0/MOTM候选→7.0. 主要威胁仅限点球+定位球头球, 非运动战破局者.',
+         size=Pt(8.5), color=ACCENT, space_after=Pt(4))
+add_para('西班牙首发修正: RB波罗(€50M热刺, 对奥地利进球)替代略伦特. AM奥尔莫(€50M巴萨)替代梅里诺. 来源: player_database_0707.md — R32实际首发.',
+         size=Pt(8.5), color=ACCENT, space_after=Pt(4))
+add_para('比利时首发修正: CB梅赫勒(€5M)替代法斯. CM瓦纳肯(€6M工兵)替代奥纳纳. CF德克特拉雷(€40M)替代卢卡库. 卢卡库=超级替补(86\'救命球). 德布劳内=那不勒斯/0助攻. 多库=本届0球0助. 来源: player_database_0707.md.',
+         size=Pt(8.5), color=ACCENT, space_after=Pt(4))
+add_para('系统综述交叉验证 (Illmer & Daumann 2022, 21篇): 降雨无效应[已确认] | 海拔降身体不降技术[已确认] | 温度需条件分支[已确认] | 风影响进攻[待纳入]',
+         size=Pt(8.5), color=RGBColor(0x55,0x55,0x55), space_after=Pt(6))
 
-# MATCH 2: USA vs BEL
-h1('四、比赛2: 美国 vs 比利时')
-meta('7月7日 08:00 北京时间 (7/6 17:00 PT) | 流明球场, 西雅图 | FIFA #13 vs #4 | 历史: 比利时2-1美国 (2014 R16 AET)')
-
-h2('4.1 基本信息')
-make_table(
-    ['项目','内容'],
-    [['时间','7月7日 08:00 北京时间'],
-     ['场地','流明球场 (Lumen Field), 西雅图, 美国'],
-     ['FIFA排名','美国 #13 vs 比利时 #4'],
-     ['阵容身价','美国 ~3.45亿欧元 vs 比利时 5.30亿欧元 (约1:1.54)'],
-     ['历史交锋(世界杯)','2014 R16: 比利时 2-1 美国 (AET)'],
-     ['最近交手','2026年3月友谊赛: 比利时 5-2 美国 — 但美国阵容大不同'],
-     ['关键缺席','美国: 巴洛贡(3球/最佳射手)红牌停赛'],
-     ['晋级奖励','四分之一决赛 vs 葡萄牙/西班牙胜者 (7/10 洛杉矶)']],
-    widths=[2.5,10.8],
-)
-
-h2('4.2 小组赛及淘汰赛回顾')
-make_table(
-    ['球队','对手','比分','关键'],
-    [['美国','巴拉圭 (G1)','4-1','攻击力爆表'],
-     ['美国','澳大利亚 (G2)','2-0','提前出线'],
-     ['美国','土耳其 (G3)','2-3','轮换阵容仍进2球'],
-     ['美国','波黑 (R32)','2-0','巴洛贡45\'+蒂尔曼82\' — 10人扩大比分'],
-     ['比利时','埃及 (G1)','1-1','勉强逼平'],
-     ['比利时','伊朗 (G2)','0-0','对10人伊朗大巴0进球'],
-     ['比利时','新西兰 (G3)','5-1','进攻爆发'],
-     ['比利时','塞内加尔 (R32)','3-2 AET','0-2落后86\' → 卢卡库86\'+蒂勒曼斯89\'120+5\'(点) — 神级逆转']],
-    widths=[1.2,2.4,2.2,5.4],
-)
-p=mp(before=4,after=0); arun(p,'[关键] 美国: 4场全部2+进球。比利时: 对塞内加尔86分钟前0射正 — 依赖个人英雄逆转 — 防线速度是致命弱点。',size=8,bold=True,color=RED_T)
-
-h2('4.3 核心球员评分')
-make_table(
-    ['球队','球员','评分','位置/俱乐部','关键信息'],
-    [['美国','马特·弗里兹','7.5','门将 / 纽约城','对波黑2次关键扑救'],
-     ['美国','安东尼·罗宾逊','8.0 [关键]','左后卫 / 富勒姆','本届最佳左后卫之一'],
-     ['美国','泰勒·亚当斯','7.8 [关键]','后腰 / 伯恩茅斯','锁死德布劳内的关键'],
-     ['美国','韦斯顿·麦肯尼','7.5','前腰 / 尤文图斯','对抗+跑动覆盖巨大'],
-     ['美国','马利克·蒂尔曼','7.8 [MOTM]','中场 / 埃因霍温','对波黑1球1助 — 任意球破门'],
-     ['美国','克里斯蒂安·普利西奇','7.5 [关键]','左边锋 / AC米兰','队长 — 巴洛贡缺阵后攻击核心'],
-     ['美国','里卡多·佩皮','6.5 [注意]','中锋 / PSV','13球/41场国队 — 本届0球 — 取代巴洛贡'],
-     ['美国缺阵','福拉林·巴洛贡','—','中锋 / 摩纳哥','[停赛] 3球最佳射手'],
-     ['比利时','蒂博·库尔图瓦','7.5','门将 / 皇家马德里','世界级 — 但对塞内加尔失2球'],
-     ['比利时','尤里·蒂勒曼斯 [C]','8.5 [MOTM]','中场 / 阿斯顿维拉','89\'扳平+120+5\'点球 — 本届最关键球员'],
-     ['比利时','凯文·德布劳内','7.2 [注意]','攻击中场 / 那不勒斯','35岁/0助攻/未踢满90\'/R32被56\'换下'],
-     ['比利时','莱安德罗·特罗萨尔','7.5 [关键]','左边锋 / 阿森纳','2球1助 — 主要攻击威胁'],
-     ['比利时','热雷米·多库','7.0','右边锋 / 曼城','0球0助/R32被56\'换下'],
-     ['比利时','罗梅卢·卢卡库','7.5 [超级替补]','中锋 / 罗马','86\'救命进球 — 仅适合30分钟冲刺'],
-     ['比利时弱点','布兰登·梅赫勒','6.5 [弱点]','中卫 / 布鲁日','对塞内加尔被打穿 — 速度不足']],
-    widths=[1.2,3.2,1.6,2.3,5.0],
-)
-
-h2('4.4 因素导向')
-make_table(
-    ['因素','有利','理由'],
-    [['巴洛贡停赛: 3球最佳射手缺阵','比利时 ★★★','美国失去战术支点+最佳终结者'],
-     ['美国主场: 西雅图Lumen Field — 3300万人看R32','美国 ★★★','东道主主场优势 — 波切蒂诺"26人团队"信念'],
-     ['比利时体能: R32打120分钟+仅休4天','美国 ★★★','德布劳内/库尔图瓦35岁恢复更慢'],
-     ['美国攻击稳定性: 4场全部2+进球','美国 ★★','蒂尔曼/普利西奇/麦肯尼多点开花'],
-     ['比利时逆转基因: 86\'起死回生','比利时 ★★','不能被提前杀死'],
-     ['比利时防线速度: 梅赫勒被打穿','美国 ★★','普利西奇+德斯特反击速度可能致命'],
-     ['德布劳内状态: 35岁/0助攻/无90分钟体能','美国 ★★','亚当斯可针对性锁死 — 完美验证体系型弱点'],
-     ['身价比 1:1.54 (<3:1接近)','中立','任何结果都可能']],
-    widths=[5.0,1.8,6.5],
-)
-
-h2('4.5 强队分类')
-make_table(
-    ['球队','总身价','超巨(>=€80M)','分型'],
-    [['美国','~€345M (T2)','无','非强队方 — 主场优势拉至均势'],
-     ['比利时','€530M (T2)','仅德布劳内(€55M—未达阈值)','体系型 — 对塞内加尔86分钟0射正验证']],
-    widths=[1.5,2.0,4.0,3.0],
-)
-p=mp(before=4,after=0); arun(p,'比利时=体系型。一旦亚当斯锁死德布劳内→比利时创造力归零。对塞内加尔86分钟0射正完美验证。',size=8,bold=True,color=RED_T)
-
-h2('4.6 比分预测')
-make_table(
-    ['首选','概率','半场','逻辑'],
-    [['美国 2-1 比利时','~40%','1-0','普利西奇32\'+蒂尔曼67\' — 卢卡库78\'替补追回'],
-     ['1-1 (加时/点球)','~22%','0-0','蒂勒曼斯85\' — 德斯特90+3\' — 加时双方体能崩'],
-     ['美国 2-0 比利时','~18%','1-0','麦肯尼23\'+佩皮58\'首球 — 弗里兹零封'],
-     ['比利时 1-0 美国','~12%','0-0','德布劳内找回60分钟巅峰直塞多库'],
-     ['比利时 3-1 美国','~8%','0-2','德布劳内41\'82\'+多库55\' — 概率最低']],
-    widths=[2.8,1.0,0.8,7.7],pref=0,
-)
-p=mp(before=4,after=0); arun(p,'冷门风险: 中 | 平局概率约22% | 比利时赢约20% | 美国主场+体能+攻击稳定性 > 比利时个人能力。但比利时不能被提前杀死。',size=8,bold=True,color=BLUE_T)
-
-h2('4.7 伤病与停赛')
-make_table(
-    ['球队','球员','状态','影响'],
-    [['美国','福拉林·巴洛贡 (中锋)','[停赛] 红牌1场','重大 — 3球/战术支点缺失'],
-     ['美国','马克·麦肯齐 (中卫)','[疑] 脚伤','轻微'],
-     ['比利时','泽诺·德巴斯特 (中卫)','[疑]','防线轮换受损']],
-    widths=[1.2,3.5,2.5,5.1],
-)
-
-h2('4.8 冷门路径')
-body('比利时赢需同时: (1)德布劳内找回巅峰(哪怕60分钟) (2)佩皮无法替代巴洛贡 (3)库尔图瓦世界级扑救 (4)比利时逆转基因80分钟后显现',size=8)
-body('最大不确定性: 巴洛贡缺阵冲击多大? 佩皮风格不同(终结者非逼抢支点)可能改变整个前场压迫结构。',size=8,color=RED_T)
-
-# RISK
-h1('五、风险提示')
-make_table(
-    ['#','场景','风险','应用'],
-    [['1','首发未确认: ESPN roster返回0','阵容基于R32+媒体预测','赛前1小时拉roster更新'],
-     ['2','西班牙从未落后过: 5场零封=双刃剑','若葡萄牙先破门→西班牙应变未知','西班牙先失球时观察调整'],
-     ['3','巴洛贡缺阵: 美国火力不确定','佩皮(0球) vs 赖特(1分钟)','若佩皮上半场无威胁→波切蒂诺会早换'],
-     ['4','德布劳内状态: R32被换后球队逆转','加西亚敢再次换下德布劳内?','比利时落后时观察换人时机'],
-     ['5','十六强平局率32.5%','两场均有可能加时/点球','备选方案均已包含加时路径']],
-    widths=[0.8,3.5,4.5,4.5],
-)
-
-# FOOTER
-p=mp(before=18,after=0); arun(p,'数据来源: FIFA API + ESPN API + Sports Mole + Last Word On Football + Sky Sports + Yahoo Sports + Goal.com',size=7,color=META_L)
-p=mp(before=2,after=0); arun(p,'分析框架: CLAUDE.md v17 + match_analysis_template.md + historical_upset_patterns.md + memory/team-market-values.md',size=7,color=META_L)
-p=mp(before=2,after=0); arun(p,'生成时间: 2026年7月5日 CST | 引擎: python-docx v6 (横向A4) | 首发: 均未公布 — 赛前1小时更新',size=7,color=META_L)
+# Footer
+doc.add_paragraph()
+add_para('───', size=Pt(8), color=RGBColor(0xBD,0xBD,0xBD), align='center')
+add_para('数据源: player_database_0707.md + Sporting News + Fox Sports + RotoWire + Illmer & Daumann (2022)',
+         size=Pt(7), color=RGBColor(0xAA,0xAA,0xAA), align='center')
+add_para('框架: CLAUDE.md v18 (铁律10-14) | 生成: python-docx | 分析仅供参考',
+         size=Pt(7), color=RGBColor(0xAA,0xAA,0xAA), align='center')
+add_para('版权声明: 预测仅供分析参考，不构成任何投资或博彩建议。 | FIFA World Cup 2026 is a trademark of FIFA.',
+         size=Pt(6), color=RGBColor(0xCC,0xCC,0xCC), align='center')
 
 doc.save(OUT)
-print(f'OK: {OUT} ({os.path.getsize(OUT):,} bytes)')
+print(f'Saved to {OUT}')
+print(f'   File size: {os.path.getsize(OUT):,} bytes')
