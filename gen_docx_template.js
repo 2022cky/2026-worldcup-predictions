@@ -139,7 +139,7 @@ function summaryTable(rows) {
   // Actually we need exact sum. Let's recalc: 500+3800+1200+2400+2200+900+2800+1500 = 15300 - too wide for CW=14238
   // Let me fix widths
   // Actually 500+3200+1100+2200+2000+800+2600+1838 = 14238 ✓
-  const WW = [500, 3200, 1100, 2200, 2000, 800, 2600, 1838];
+  const WW = [1000, 3300, 1000, 2000, 2100, 800, 2800, 1238];
   return TBL(WW, [
     HR(["#","比赛","身价比","强队分类","首选比分","概率","备选","冷门风险"], WW),
     ...rows.map((r, i) => DR(r, WW, i === 0, i % 2 === 1)),
@@ -193,9 +193,9 @@ function scoreTable(rows) {
 
 // --- 比分详情表 (4列: 类型/比分/半场/进球者) ---
 function scoreDetailTable(rows) {
-  const W = [1600, 2800, 1200, 8638];
+  const W = [1200, 2800, 1000, 1200, 8038];
   return TBL(W, [
-    HR(["类型","比分","半场","进球者"], W),
+    HR(["类型","比分","概率","半场","进球者"], W),
     ...rows.map((r, i) => DRBI(r, W, [0, 1], i === 0, i % 2 === 1)),
   ]);
 }
