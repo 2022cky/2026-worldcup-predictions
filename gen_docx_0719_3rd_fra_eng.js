@@ -2,7 +2,7 @@
 const T = require("./gen_docx_template.js");
 
 T.buildPrediction({
-  outFile: "D:/ai/世界杯/2026年7月19日_三四名决赛_法国vs英格兰_预测.docx",
+  outFile: "D:/ai/世界杯/2026-worldcup-predictions/2026年7月19日_三四名决赛_法国vs英格兰_预测.docx",
 
   title: "法国 vs 英格兰",
   subtitle: "三四名决赛 [首发确认版] — 凯恩+贝林厄姆双双替补！两队各7人轮换",
